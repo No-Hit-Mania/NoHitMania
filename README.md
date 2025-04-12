@@ -70,7 +70,8 @@ The player will be able play a fun dodging game, collect coins to spin for stick
 
 ## Wireframes
 
-[Add picture of your hand sketched wireframes in this section]
+![image](https://github.com/user-attachments/assets/6faaeabe-3e5f-44da-9c01-daa2381efbdc)
+
 
 ### [BONUS] Digital Wireframes & Mockups
 
