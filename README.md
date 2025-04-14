@@ -41,24 +41,25 @@ The player will be able play a fun dodging game, collect coins to spin for stick
 
 ### 2. Screen Archetypes
 
-- [ ] [**Screen Name, e.g., Login Screen**]
-* [Required User Feature: User can log in.]
-- [ ] [**Another Screen Name**]
-* [Associated required user story]
-...
-...
-...
+- [ ] [**Main Menu Screen, Game Play Screen, Shop Screen, Wardrobe Screen**]
+* [Required Feature: The player can choose to play the game, go to shop, check their settings, and go to their stickman wardrobe.]
+- [ ] [**Game Play Screen**]
+* [Required Feature: Have implemented the game play]
+- [ ] [**Settings Screen**]
+* [Required Feature: The user can change settings in the app such as music and effect volume.]
+- [ ] [**Shop Screen**]
+* [Optional Feature: ]
+- [ ] [**Wardrobe Screen**] 
+* [Optinal Feature: ]
 
-### 3. Navigation
+### 3. Navigation 
 
-**Tab Navigation** (Tab to Screen)
+**Button Navigations** (On the main menu)
 
-
-- [ ] [First Tab, e.g., Home Feed]
-- [ ] [Second Tab, e.g., Profile]
-...
-...
-...
+- [ ] [Play Button: Takes the user to the game play.]
+- [ ] [Shop Button: Takes the user to the shop menu to spin for stickman accessories]
+- [ ] [Settings Button: Takes user to settings menu.]
+- [ ] [StickmanL Press on Stickman to go to wardrobe.]
 
 **Flow Navigation** (Screen to Screen)
 
