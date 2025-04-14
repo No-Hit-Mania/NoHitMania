@@ -23,7 +23,7 @@ The player will be able play a fun dodging game, collect coins to spin for stick
 - **Story:**  [No story.]
 - **Market:** [Gamers.]
 - **Habit:** [Occasional use app for entertainment]
-- **Scope:** [Is it a broad or narrow app in terms of features?]
+- **Scope:** [Targets players that enjoy bullet hell styled games]
 
 ## Product Spec
 
@@ -31,13 +31,21 @@ The player will be able play a fun dodging game, collect coins to spin for stick
 
 **Required Must-have Stories**
 
-* [User can [specific action, e.g., register an account]]
-* ...
+* [Users can start the games]
+* [Users can change settings]
+* [Users can move in the grid]
+* [Users can pause their game]
+* [Users can have persistent data to save their game state]
+
+Subject to change.
 
 **Optional Nice-to-have Stories**
 
-* [User can [specific action, e.g., persist user information across working sessions]]
-* ...
+* [Users can go to a shop be able to purchase cosmetics]
+* [Users can choose to play previous levels]
+* [Users can relaunch to the same game state prior to closing the app]
+
+Subject to change.
 
 ### 2. Screen Archetypes
 
@@ -63,39 +71,38 @@ The player will be able play a fun dodging game, collect coins to spin for stick
 
 **Flow Navigation** (Screen to Screen)
 
-- [ ] [**Screen Name**]
-  * Leads to [**Next Screen**]
-- [ ] [**Another Screen Name**]
-  * Leads to [**Another Screen**] 
+- [ ] [**Menu**]
+  * Leads to [**Game Window**]
+  * Leads to [**Shop**]
+  * Leads to [**Wardrobe**]
+  * Leads to [**Settings**]
+  * Leads to [**GitHub page**]
+- [ ] [**Game Window**]
+  * Leads to [**Settings**]
+- [ ] [**Shop**]
+  * Leads to [**Menu**]
+  * Leads to [**Wardrobe**]
+- [ ] [**Wardrobe**]
+  * Leads to [**Menu**]
+  * Leads to [**Shop**]
+- [ ] [**Settings**]
+  * If in game
+    * Leads to [**Game Window**]
+  * Leads to [**Menu**]
 
 
 ## Wireframes
 
 ![image](https://github.com/user-attachments/assets/6faaeabe-3e5f-44da-9c01-daa2381efbdc)
 
-
-### [BONUS] Digital Wireframes & Mockups
-
 ### [BONUS] Interactive Prototype
 
-## Schema 
-
+![Gif](https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExeDYxZ3AwZG1vd241M2NwdXVvb2trOXg3eGp0dXBmMGlhOWJrM3VzbCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/djaegchkYeOTeXcxgp/giphy.gif)
 
 ### Models
 
-[Model Name, e.g., User]
-| Property | Type   | Description                                  |
-|----------|--------|----------------------------------------------|
-| username | String | unique id for the user post (default field)   |
-| password | String | user's password for login authentication      |
-| ...      | ...    | ...                          
-
+- [No Models needed]
 
 ### Networking
 
-- [List of network requests by screen]
-- [Example: `[GET] /users` - to retrieve user data]
-- ...
-- [Add list of network requests by screen ]
-- [Create basic snippets for each Parse network request]
-- [OPTIONAL: List endpoints if using existing API such as Yelp]
+- [No Networking needed]
