@@ -1,38 +1,11 @@
 //
-//  NoHitManiaApp.swift
+//  GameScene.swift
 //  NoHitMania
 //
 //  Created by Christian Barajas on 4/15/25.
 //
 
-import SwiftUI
 import SpriteKit
-
-struct ContentView: View {
-    @State var direction: String = "Swipe to move the box"
-    
-    var scene: SKScene {
-        let scene = GameScene()
-        scene.size = CGSize(width: 300, height: 300)
-        scene.scaleMode = .fill
-        scene.getDirectionCallback = { newDirection in
-            direction = newDirection
-        }
-        return scene
-    }
-    
-    var body: some View {
-        VStack {
-            Text(direction)
-                .font(.headline)
-                .padding()
-            
-            SpriteView(scene: scene)
-                .frame(width: 300, height: 300)
-                .ignoresSafeArea()
-        }
-    }
-}
 
 class GameScene: SKScene {
     private var startTouchPosition: CGPoint?
@@ -48,11 +21,6 @@ class GameScene: SKScene {
     
     // Player grid position (0-4, 0-4)
     private var playerGridPosition = GridPosition(x: 2, y: 2)
-    
-    struct GridPosition {
-        var x: Int
-        var y: Int
-    }
     
     override func didMove(to view: SKView) {
         backgroundColor = .black
@@ -185,8 +153,4 @@ class GameScene: SKScene {
         // Reset start position
         startTouchPosition = nil
     }
-}
-
-#Preview {
-    ContentView()
 }

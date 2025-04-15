@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		E324547E2DAF0BF80011743C /* NoHitMania.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NoHitMania.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E324547E2DAF0BF80011743C /* NoHitMania.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = NoHitMania.app; path = "/Users/justnekochris/Desktop/NoHitMania/build/Debug-iphoneos/NoHitMania.app"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -33,16 +33,7 @@
 			isa = PBXGroup;
 			children = (
 				E32454802DAF0BF80011743C /* NoHitMania */,
-				E324547F2DAF0BF80011743C /* Products */,
 			);
-			sourceTree = "<group>";
-		};
-		E324547F2DAF0BF80011743C /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				E324547E2DAF0BF80011743C /* NoHitMania.app */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -95,7 +86,7 @@
 			mainGroup = E32454752DAF0BF80011743C;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = E324547F2DAF0BF80011743C /* Products */;
+			productRefGroup = E32454752DAF0BF80011743C;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
