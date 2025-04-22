@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		E324547E2DAF0BF80011743C /* NoHitMania.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = NoHitMania.app; path = "/Users/justnekochris/Desktop/NoHitMania/build/Debug-iphoneos/NoHitMania.app"; sourceTree = "<absolute>"; };
+		E39A92C22DB8284600DE6FD7 /* NoHitMania.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NoHitMania.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -33,6 +33,7 @@
 			isa = PBXGroup;
 			children = (
 				E32454802DAF0BF80011743C /* NoHitMania */,
+				E39A92C22DB8284600DE6FD7 /* NoHitMania.app */,
 			);
 			sourceTree = "<group>";
 		};
@@ -58,7 +59,7 @@
 			packageProductDependencies = (
 			);
 			productName = NoHitMania;
-			productReference = E324547E2DAF0BF80011743C /* NoHitMania.app */;
+			productReference = E39A92C22DB8284600DE6FD7 /* NoHitMania.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -242,7 +243,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"NoHitMania/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = NoHitMania/Utilities/Assets.xcassets;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -270,7 +271,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"NoHitMania/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = NoHitMania/Utilities/Assets.xcassets;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
