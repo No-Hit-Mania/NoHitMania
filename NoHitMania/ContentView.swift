@@ -14,7 +14,7 @@ struct ContentView: View {
     @State var elapsedTime: TimeInterval = 0.0
     @State var startTime: Date? = nil
     @State var currentLevel: Int = 1
-    private let timer = Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()
+    private let timer = Timer.publish(every: 1.0/60.0, on: .main, in: .common).autoconnect()
     
     func formattedTime(elapsed: TimeInterval) -> String {
         let totalSeconds = Int(elapsed)
