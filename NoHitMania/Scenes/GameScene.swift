@@ -6,8 +6,17 @@
 //
 
 import SpriteKit
+import Combine
 
 class GameScene: SKScene {
+    // timer related things
+    private var elapsedTime: TimeInterval = 0.0
+    private var startTime: Date? = nil
+    private let timer = Timer.publish(every: 1.0/60.0, on: .main, in: .common).autoconnect()
+    private var scoreTimerLabel: SKLabelNode!
+    private var cancellables: Set<AnyCancellable> = []
+    
+    // Touch Screen configs
     private var startTouchPosition: CGPoint?
     var getDirectionCallback: ((String) -> Void)?
     
@@ -22,10 +31,25 @@ class GameScene: SKScene {
     // Player grid position (0-4, 0-4)
     private var playerGridPosition = GridPosition(x: 2, y: 2)
     
+    // Player alive bool
+    private var playerAlive:Bool = true
+    
+    // Player's current Level
+    private var currentLevel: Int = 1
+    
+    // when scene appears
     override func didMove(to view: SKView) {
         backgroundColor = .black
         setupGrid()
         createPlayer()
+        setupTimer()
+        timer
+            .sink { [weak self] _ in
+                guard let self = self, let startTime = self.startTime else { return }
+                self.elapsedTime = Date().timeIntervalSince(startTime)
+                self.scoreTimerLabel.text = self.formattedTime(elapsed: self.elapsedTime)
+            }
+            .store(in: &cancellables)
     }
     
     private func setupGrid() {
@@ -67,6 +91,18 @@ class GameScene: SKScene {
         updatePlayerNodePosition()
         
         addChild(playerNode)
+    }
+    
+    private func setupTimer() {
+        scoreTimerLabel = SKLabelNode(text: "00:00.00")
+        scoreTimerLabel.fontColor = .black
+        scoreTimerLabel.fontSize = 24
+     
+        scoreTimerLabel.position = CGPoint(x: size.width / 2, y: size.height - 10)
+        addChild(scoreTimerLabel)
+
+        // Initialize the start time when the scene is presented
+        startTime = Date()
     }
     
     private func updatePlayerNodePosition() {
@@ -152,5 +188,14 @@ class GameScene: SKScene {
         
         // Reset start position
         startTouchPosition = nil
+    }
+    
+    func formattedTime(elapsed: TimeInterval) -> String {
+        let totalSeconds = Int(elapsed)
+        let minutes = totalSeconds / 60
+        let seconds = totalSeconds % 60
+        // Calculate the hundredths part from the fractional seconds
+        let hundredths = Int((elapsed - Double(totalSeconds)) * 100)
+        return String(format: "%02d:%02d.%02d", minutes, seconds, hundredths)
     }
 }

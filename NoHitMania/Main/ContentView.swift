@@ -35,10 +35,6 @@ struct ContentView: View {
     
     var body: some View {
         VStack {
-            Text(direction)
-                .font(.headline)
-                .padding()
-            
             SpriteView(scene: scene)
                 .frame(width: 300, height: 300)
                 .ignoresSafeArea()
