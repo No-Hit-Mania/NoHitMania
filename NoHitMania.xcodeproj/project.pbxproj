@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		E324547E2DAF0BF80011743C /* NoHitMania.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NoHitMania.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E39A92C22DB8284600DE6FD7 /* NoHitMania.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NoHitMania.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -33,16 +33,8 @@
 			isa = PBXGroup;
 			children = (
 				E32454802DAF0BF80011743C /* NoHitMania */,
-				E324547F2DAF0BF80011743C /* Products */,
+				E39A92C22DB8284600DE6FD7 /* NoHitMania.app */,
 			);
-			sourceTree = "<group>";
-		};
-		E324547F2DAF0BF80011743C /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				E324547E2DAF0BF80011743C /* NoHitMania.app */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -67,7 +59,7 @@
 			packageProductDependencies = (
 			);
 			productName = NoHitMania;
-			productReference = E324547E2DAF0BF80011743C /* NoHitMania.app */;
+			productReference = E39A92C22DB8284600DE6FD7 /* NoHitMania.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -95,7 +87,7 @@
 			mainGroup = E32454752DAF0BF80011743C;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = E324547F2DAF0BF80011743C /* Products */;
+			productRefGroup = E32454752DAF0BF80011743C;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -251,7 +243,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"NoHitMania/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = NoHitMania/Utilities/Assets.xcassets;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -280,7 +272,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"NoHitMania/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = NoHitMania/Utilities/Assets.xcassets;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
