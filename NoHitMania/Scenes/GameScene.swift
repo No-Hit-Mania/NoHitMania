@@ -6,10 +6,19 @@
 //
 
 import SpriteKit
+import Combine
 
 class GameScene: SKScene {
+    // timer related things
+    private var elapsedTime: TimeInterval = 0.0
+    private var startTime: Date? = nil
+    private let timer = Timer.publish(every: 1.0/60.0, on: .main, in: .common).autoconnect()
+    private var scoreTimerLabel: SKLabelNode!
+    private var cancellables: Set<AnyCancellable> = []
+    private var secondsBetweenLevels: Int = 5
+
+    // Touch Screen configs
     private var startTouchPosition: CGPoint?
-    var getDirectionCallback: ((String) -> Void)?
     
     // Grid configuration
     private let gridSize = 5
@@ -22,12 +31,51 @@ class GameScene: SKScene {
     // Player grid position (0-4, 0-4)
     private var playerGridPosition = GridPosition(x: 2, y: 2)
     
+    // Player logic
+    private var playerAlive:Bool = true
+    private var currentLevel: Int = 1
+    private var currentLevelLabel: SKLabelNode!
+    
+
+    // when scene appears
     override func didMove(to view: SKView) {
         backgroundColor = .black
         setupGrid()
         createPlayer()
+        setupTimer()
+        timer
+            .sink { [weak self] _ in
+                // timerUpdate
+                self?.timerUpdate()
+            }
+            .store(in: &cancellables)
     }
     
+    private func timerUpdate() {
+        // also works as our framerate
+        if playerAlive {
+            guard let startTime = self.startTime, let scoreTimerLabel = self.scoreTimerLabel else {
+                return
+            }
+            // update time
+            self.elapsedTime = Date().timeIntervalSince(startTime)
+            scoreTimerLabel.text = self.formattedTime(elapsed: self.elapsedTime)
+            // check if level should go up
+            if self.currentLevel < 5 {
+                let new = (Int(self.elapsedTime)/self.secondsBetweenLevels) + 1
+                if new > self.currentLevel {
+                    self.currentLevel += 1
+                    self.currentLevelLabel.text = "Level: \(currentLevel)"
+                    print("timerUpdate: level up \(currentLevel)")
+                }
+                
+            }
+            // any other checks
+        }
+        else {
+            // TODO: Add game over screen
+        }
+    }
     private func setupGrid() {
         // Calculate cell size based on scene size
         cellSize = min(size.width, size.height) / CGFloat(gridSize)
@@ -67,6 +115,28 @@ class GameScene: SKScene {
         updatePlayerNodePosition()
         
         addChild(playerNode)
+    }
+    
+    private func setupTimer() {
+        // timerLabel settings
+        scoreTimerLabel = SKLabelNode(text: "00:00.00")
+        scoreTimerLabel.fontColor = .white
+        scoreTimerLabel.fontSize = 30
+        scoreTimerLabel.position = CGPoint(x: size.width / 2, y: size.height - 100)
+        scoreTimerLabel.fontName = "Helvetica-Bold"
+        addChild(scoreTimerLabel)
+
+        // levelLabel settings
+        currentLevelLabel = SKLabelNode(text: "Level: \(currentLevel)")
+        currentLevelLabel.fontColor = .white
+        currentLevelLabel.fontName = "Helvetica-Bold"
+        currentLevelLabel.fontSize = 25
+        currentLevelLabel.position = CGPoint(x: size.width / 2, y: size.height - 135)
+
+        addChild(currentLevelLabel)
+        
+        // Initialize the start time when the scene is presented
+        startTime = Date()
     }
     
     private func updatePlayerNodePosition() {
@@ -111,9 +181,9 @@ class GameScene: SKScene {
         
         if moved {
             updatePlayerNodePosition()
-            getDirectionCallback?("Moved \(direction)")
+            print("movePlayer: Moved \(direction)")
         } else {
-            getDirectionCallback?("Can't move \(direction)")
+            print("movePlayer: Can't move \(direction)")
         }
     }
     
@@ -152,5 +222,14 @@ class GameScene: SKScene {
         
         // Reset start position
         startTouchPosition = nil
+    }
+    
+    func formattedTime(elapsed: TimeInterval) -> String {
+        let totalSeconds = Int(elapsed)
+        let minutes = totalSeconds / 60
+        let seconds = totalSeconds % 60
+        // Calculate the hundredths part from the fractional seconds
+        let hundredths = Int((elapsed - Double(totalSeconds)) * 100)
+        return String(format: "%02d:%02d.%02d", minutes, seconds, hundredths)
     }
 }
