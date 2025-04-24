@@ -24,7 +24,7 @@ struct ContentView: View {
     }
     
     var scene: SKScene {
-        let scene = GameScene()
+        let scene = OptionsScene()
         scene.size = CGSize(width: 300, height: 300)
         scene.scaleMode = .fill
         scene.getDirectionCallback = { newDirection in
