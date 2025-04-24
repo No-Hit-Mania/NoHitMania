@@ -40,12 +40,16 @@ class GameScene: SKScene {
     private var currentLevel: Int = 1
     private var currentLevelLabel: SKLabelNode!
 
+    // BGM of the game scene
+    private var backgroundMusicNode: SKAudioNode?
+
     // when scene appears
     override func didMove(to view: SKView) {
         backgroundColor = .black
         setupGrid()
         createPlayer()
         setupTimer()
+        setupBackgroundMusic()
         startTimer() // Start the timer when the scene loads
 
     }
@@ -263,5 +267,51 @@ class GameScene: SKScene {
         // Calculate the hundredths part from the fractional seconds
         let hundredths = Int((elapsed - Double(totalSeconds)) * 100)
         return String(format: "%02d:%02d.%02d", minutes, seconds, hundredths)
+    }
+    private func setupBackgroundMusic() {
+        // Ensure music isn't already playing
+        if backgroundMusicNode == nil {
+            let musicNode = SKAudioNode(fileNamed: "gameMusicLoopable.mp3")
+            musicNode.autoplayLooped = true
+            musicNode.isPositional = false
+            
+            addChild(musicNode)
+            backgroundMusicNode = musicNode
+            
+            print("setupBackgroundMusic: done.")
+        }
+    }
+    
+    func changeActiveMusic(music: String) {
+        // remove current music
+        if let currentMusicNode = backgroundMusicNode {
+            currentMusicNode.removeFromParent()
+            backgroundMusicNode = nil
+        }
+        
+        var fileName: String
+        switch music {
+        case "game":
+            fileName = "gameMusicLoopable.mp3"
+        case "pause":
+            fileName = "pauseMusic.mp3"
+        case "none":
+            print("changeActiveMusic: stopped")
+            return
+            
+        default:
+            print("WARNING changeActiveMusic: \(music) not a selectable song")
+            fileName = "gameMusicLoopable.mp3"
+        }
+        
+        let newMusicNode = SKAudioNode(fileNamed: fileName)
+        newMusicNode.autoplayLooped = true
+        newMusicNode.isPositional = false
+
+        addChild(newMusicNode)
+        backgroundMusicNode = newMusicNode
+
+        print("changeActiveMusic: playing \(fileName)")
+        
     }
 }
