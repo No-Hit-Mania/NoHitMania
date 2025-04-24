@@ -10,32 +10,35 @@ import Combine
 
 class GameScene: SKScene {
     // timer related things
-    private var elapsedTime: TimeInterval = 0.0
+    private var scoreTime: TimeInterval = 0.0
+    private var accumulatedTime: TimeInterval = 0.0
     private var startTime: Date? = nil
-    private let timer = Timer.publish(every: 1.0/60.0, on: .main, in: .common).autoconnect()
+    private var isTimerRunning: Bool = false
+    // change double to change framerate
+    private var timer = Timer.publish(every: 1.0/60.0, on: .main, in: .common).autoconnect()
     private var scoreTimerLabel: SKLabelNode!
-    private var cancellables: Set<AnyCancellable> = []
+    private var gameTimerSubscription: AnyCancellable?
+
     private var secondsBetweenLevels: Int = 5
 
     // Touch Screen configs
     private var startTouchPosition: CGPoint?
-    
+
     // Grid configuration
     private let gridSize = 5
     private var cellSize: CGFloat = 0
     private var gridOrigin = CGPoint.zero
-    
+
     // Player node
     private var playerNode: SKSpriteNode!
-    
+
     // Player grid position (0-4, 0-4)
     private var playerGridPosition = GridPosition(x: 2, y: 2)
-    
+
     // Player logic
     private var playerAlive:Bool = true
     private var currentLevel: Int = 1
     private var currentLevelLabel: SKLabelNode!
-    
 
     // when scene appears
     override func didMove(to view: SKView) {
@@ -43,37 +46,67 @@ class GameScene: SKScene {
         setupGrid()
         createPlayer()
         setupTimer()
-        timer
-            .sink { [weak self] _ in
-                // timerUpdate
-                self?.timerUpdate()
-            }
-            .store(in: &cancellables)
+        startTimer() // Start the timer when the scene loads
+
     }
     
-    private func timerUpdate() {
-        // also works as our framerate
-        if playerAlive {
-            guard let startTime = self.startTime, let scoreTimerLabel = self.scoreTimerLabel else {
-                return
+    private func startTimer() {
+        accumulatedTime = 0.0
+        scoreTime = 0.0
+        startTime = Date()
+        isTimerRunning = true
+        gameTimerSubscription = timer
+            .sink { [weak self] _ in
+                self?.timerUpdate()
             }
-            // update time
-            self.elapsedTime = Date().timeIntervalSince(startTime)
-            scoreTimerLabel.text = self.formattedTime(elapsed: self.elapsedTime)
-            // check if level should go up
-            if self.currentLevel < 5 {
-                let new = (Int(self.elapsedTime)/self.secondsBetweenLevels) + 1
-                if new > self.currentLevel {
-                    self.currentLevel += 1
-                    self.currentLevelLabel.text = "Level: \(currentLevel)"
-                    print("timerUpdate: level up \(currentLevel)")
-                }
-                
-            }
-            // any other checks
+    }
+
+    private func pauseTimer() {
+        if isTimerRunning, let start = startTime {
+            // Add up the time since last start/pause
+            accumulatedTime += Date().timeIntervalSince(start)
+            startTime = nil
+            isTimerRunning = false
+            gameTimerSubscription?.cancel()
+            gameTimerSubscription = nil
+            print("pauseTimer: at: \(formattedTime(elapsed: accumulatedTime))")
         }
-        else {
-            // TODO: Add game over screen
+    }
+
+    private func resumeTimer() {
+        if !isTimerRunning {
+            startTime = Date() // Set a new start time for the current run
+            isTimerRunning = true
+            gameTimerSubscription = timer
+                .sink { [weak self] _ in
+                    self?.timerUpdate()
+                }
+            print("pauseTimer: at: \(formattedTime(elapsed: accumulatedTime))")
+        }
+    }
+
+    private func timerUpdate() {
+        if isTimerRunning {
+            if playerAlive {
+                guard let startTime = self.startTime, let scoreTimerLabel = self.scoreTimerLabel else {
+                    return
+                }
+                // Calculate the elapsed time since the current start and add the accumulated time
+                let elapsedTime = Date().timeIntervalSince(startTime)
+                self.scoreTime = elapsedTime + self.accumulatedTime
+                scoreTimerLabel.text = self.formattedTime(elapsed: self.scoreTime)
+
+                if self.currentLevel < 5 {
+                    let new = (Int(self.scoreTime)/self.secondsBetweenLevels) + 1
+                    if new > self.currentLevel {
+                        self.currentLevel += 1
+                        self.currentLevelLabel.text = "Level: \(currentLevel)"
+                        print("timerUpdate: level up \(currentLevel)")
+                    }
+                }
+            } else {
+                // TODO: Add game over screen
+            }
         }
     }
     private func setupGrid() {
@@ -104,19 +137,19 @@ class GameScene: SKScene {
             }
         }
     }
-    
+
     private func createPlayer() {
         // Create player slightly smaller than cell
         let playerSize = cellSize * 0.8
         playerNode = SKSpriteNode(imageNamed: "pixil-frame-0")
         playerNode.size = CGSize(width: playerSize, height: playerSize)
-        
+
         // Position player in the center cell initially
         updatePlayerNodePosition()
-        
+
         addChild(playerNode)
     }
-    
+
     private func setupTimer() {
         // timerLabel settings
         scoreTimerLabel = SKLabelNode(text: "00:00.00")
@@ -134,26 +167,25 @@ class GameScene: SKScene {
         currentLevelLabel.position = CGPoint(x: size.width / 2, y: size.height - 135)
 
         addChild(currentLevelLabel)
-        
-        // Initialize the start time when the scene is presented
-        startTime = Date()
+
+        isTimerRunning = false
     }
-    
+
     private func updatePlayerNodePosition() {
         // Convert grid position to scene position
         let pixelX = gridOrigin.x + (CGFloat(playerGridPosition.x) + 0.5) * cellSize
         let pixelY = gridOrigin.y + (CGFloat(playerGridPosition.y) + 0.5) * cellSize
-        
+
         // Create move action
         let moveAction = SKAction.move(to: CGPoint(x: pixelX, y: pixelY), duration: 0.2)
         moveAction.timingMode = .easeOut
-        
+
         playerNode.run(moveAction)
     }
-    
+
     private func movePlayer(direction: String) {
         var moved = false
-        
+
         switch direction {
         case "Up":
             if playerGridPosition.y < gridSize - 1 {
@@ -178,7 +210,7 @@ class GameScene: SKScene {
         default:
             break
         }
-        
+
         if moved {
             updatePlayerNodePosition()
             print("movePlayer: Moved \(direction)")
@@ -186,12 +218,12 @@ class GameScene: SKScene {
             print("movePlayer: Can't move \(direction)")
         }
     }
-    
+
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         startTouchPosition = touch.location(in: self)
     }
-    
+
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first, let start = startTouchPosition else { return }
         let end = touch.location(in: self)
@@ -223,7 +255,7 @@ class GameScene: SKScene {
         // Reset start position
         startTouchPosition = nil
     }
-    
+
     func formattedTime(elapsed: TimeInterval) -> String {
         let totalSeconds = Int(elapsed)
         let minutes = totalSeconds / 60
