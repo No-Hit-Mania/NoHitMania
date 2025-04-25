@@ -22,10 +22,22 @@ class GameScene: SKScene {
     // Player grid position (0-4, 0-4)
     private var playerGridPosition = GridPosition(x: 2, y: 2)
     
+    // Electric cells
+    private var zapCells: [(row: Int, col: Int, nextActivationTime: TimeInterval)] = []
+    private var lastUpdateTime: TimeInterval = 0
+    private var gameStartTime: TimeInterval = 0
+    
     override func didMove(to view: SKView) {
         backgroundColor = .black
         setupGrid()
         createPlayer()
+        
+        // Add electric cells
+        addZapCell(row: 1, col: 3)
+        addZapCell(row: 3, col: 2)
+        
+        // Record start time
+        gameStartTime = CACurrentMediaTime()
     }
     
     private func setupGrid() {
@@ -52,8 +64,20 @@ class GameScene: SKScene {
                 cell.strokeColor = .white
                 cell.lineWidth = 1
                 cell.fillColor = UIColor.systemPink
+                cell.name = "cell_\(row)_\(col)"
                 addChild(cell)
             }
+        }
+    }
+    
+    private func addZapCell(row: Int, col: Int) {
+        if let cell = childNode(withName: "cell_\(row)_\(col)") as? SKShapeNode {
+            cell.fillColor = UIColor.yellow
+            cell.name = "zap_\(row)_\(col)"
+            
+            // Schedule first activation in 2-4 seconds
+            let firstActivation = TimeInterval.random(in: 2...4)
+            zapCells.append((row: row, col: col, nextActivationTime: firstActivation))
         }
     }
     
@@ -114,6 +138,83 @@ class GameScene: SKScene {
             getDirectionCallback?("Moved \(direction)")
         } else {
             getDirectionCallback?("Can't move \(direction)")
+        }
+    }
+    
+    override func update(_ currentTime: TimeInterval) {
+        if lastUpdateTime == 0 {
+            lastUpdateTime = currentTime
+            gameStartTime = currentTime
+            return
+        }
+        
+        let deltaTime = currentTime - lastUpdateTime
+        lastUpdateTime = currentTime
+        
+        let elapsedTime = currentTime - gameStartTime
+        
+        // Check zap cells
+        checkZapCells(currentTime: elapsedTime)
+    }
+    
+    private func checkZapCells(currentTime: TimeInterval) {
+        for i in 0..<zapCells.count {
+            if currentTime >= zapCells[i].nextActivationTime {
+                // Time to activate this zap cell!
+                activateZapCell(row: zapCells[i].row, col: zapCells[i].col)
+                
+                // Schedule next activation in 3-6 seconds
+                zapCells[i].nextActivationTime = currentTime + TimeInterval.random(in: 3...6)
+            }
+            
+            // Flash warning animation as activation approaches
+            let timeUntilActivation = zapCells[i].nextActivationTime - currentTime
+            if timeUntilActivation < 1.0 {
+                // Flash warning for the last second
+                flashWarning(row: zapCells[i].row, col: zapCells[i].col, intensity: Float(1.0 - timeUntilActivation))
+            }
+        }
+    }
+    
+    private func flashWarning(row: Int, col: Int, intensity: Float) {
+        if let cell = childNode(withName: "zap_\(row)_\(col)") as? SKShapeNode {
+            // Pulsate between yellow and brighter yellow based on intensity
+            let brightFactor = 0.5 + (CGFloat(intensity) * 0.5)
+            cell.fillColor = UIColor.yellow.withAlphaComponent(brightFactor)
+        }
+    }
+    
+    private func activateZapCell(row: Int, col: Int) {
+        if let cell = childNode(withName: "zap_\(row)_\(col)") as? SKShapeNode {
+            // Create zap animation
+            let flashSequence = SKAction.sequence([
+                SKAction.colorize(with: UIColor.white, colorBlendFactor: 1, duration: 0.05),
+                SKAction.colorize(with: UIColor.systemBlue, colorBlendFactor: 1, duration: 0.1),
+                SKAction.colorize(with: UIColor.yellow, colorBlendFactor: 1, duration: 0.2)
+            ])
+            
+            cell.run(flashSequence)
+            
+            // Check if player is on this cell
+            if playerGridPosition.y == row && playerGridPosition.x == col {
+                playerDie()
+            }
+        }
+    }
+    
+    private func playerDie() {
+        // Play death animation
+        let fadeOut = SKAction.fadeOut(withDuration: 0.3)
+        let scale = SKAction.scale(to: 1.5, duration: 0.3)
+        let group = SKAction.group([fadeOut, scale])
+        
+        playerNode.run(group) {
+            // Reset player position after death animation
+            self.playerGridPosition = GridPosition(x: 2, y: 2) // Reset to center
+            self.playerNode.alpha = 1.0
+            self.playerNode.setScale(1.0)
+            self.updatePlayerNodePosition()
+            self.getDirectionCallback?("You died! Back to start.")
         }
     }
     

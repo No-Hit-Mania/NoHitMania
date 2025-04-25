@@ -59,7 +59,7 @@ struct ContentView: View {
             // Update the displayed text with the formatted elapsed time.
             direction = formattedTime(elapsed: elapsedTime)
         }
-    }
+    }		
 }
 
 #Preview {
