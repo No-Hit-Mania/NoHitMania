@@ -42,12 +42,21 @@ class GameScene: SKScene {
 
     // when scene appears
     override func didMove(to view: SKView) {
-        backgroundColor = .black
+        backgroundColor = .white
         setupGrid()
         createPlayer()
         setupTimer()
         startTimer() // Start the timer when the scene loads
-
+        addPauseButton()
+    }
+    private func addPauseButton() {
+        let texture = SKTexture(imageNamed: "pause_icon")
+        let pauseNode = SKSpriteNode(texture: texture)
+        pauseNode.name = "pauseButton"
+        pauseNode.size = CGSize(width: 50, height: 50)
+        pauseNode.position = CGPoint(x: size.width / 10, y: size.height - 60)
+        pauseNode.zPosition = 100
+        addChild(pauseNode)
     }
     
     private func startTimer() {
@@ -153,7 +162,7 @@ class GameScene: SKScene {
     private func setupTimer() {
         // timerLabel settings
         scoreTimerLabel = SKLabelNode(text: "00:00.00")
-        scoreTimerLabel.fontColor = .white
+        scoreTimerLabel.fontColor = .black
         scoreTimerLabel.fontSize = 30
         scoreTimerLabel.position = CGPoint(x: size.width / 2, y: size.height - 100)
         scoreTimerLabel.fontName = "Helvetica-Bold"
@@ -161,7 +170,7 @@ class GameScene: SKScene {
 
         // levelLabel settings
         currentLevelLabel = SKLabelNode(text: "Level: \(currentLevel)")
-        currentLevelLabel.fontColor = .white
+        currentLevelLabel.fontColor = .black
         currentLevelLabel.fontName = "Helvetica-Bold"
         currentLevelLabel.fontSize = 25
         currentLevelLabel.position = CGPoint(x: size.width / 2, y: size.height - 135)
@@ -226,6 +235,13 @@ class GameScene: SKScene {
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first, let start = startTouchPosition else { return }
+        let location = touch.location(in: self)
+        let node = self.atPoint(location)
+
+        if node.name == "pauseButton" {
+            pauseTimer()
+            view?.presentScene(OptionsScene(size: self.view!.bounds.size))
+        }
         let end = touch.location(in: self)
         
         // Calculate horizontal and vertical differences
