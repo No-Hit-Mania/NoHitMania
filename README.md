@@ -51,7 +51,7 @@ Subject to change.
 
 - [ ] [**Main Menu Screen, Game Play Screen, Shop Screen, Wardrobe Screen**]
 * [Required Feature: The player can choose to play the game, go to shop, check their settings, and go to their stickman wardrobe.]
-- [ ] [**Game Play Screen**]
+- [X] [**Game Play Screen**]
 * [Required Feature: Have implemented the game play]
 - [ ] [**Settings Screen**]
 * [Required Feature: The user can change settings in the app such as music and effect volume.]
