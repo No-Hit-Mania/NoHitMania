@@ -31,6 +31,7 @@ class GameTimerManager {
     func startTimer() {
         accumulatedTime = 0.0
         scoreTime = 0.0
+        currentLevel = 1
         startTime = Date()
         isTimerRunning = true
         subscribeToTimer()

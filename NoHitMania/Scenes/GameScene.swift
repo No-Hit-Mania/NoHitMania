@@ -243,7 +243,8 @@ class GameScene: SKScene {
             audioManager.changeMusic(to: .game)
         }
     }
-    
+
+    // MARK: - RestartGame
     // Method to restart the game
     func restartGame() {
         // Reset game state
@@ -251,10 +252,11 @@ class GameScene: SKScene {
         
         // Reset spawn timing
         zapSpawnInterval = 5.0 // Reset to base spawn interval
-        nextZapSpawnTime = lastUpdateTime + 3.0 // Wait 3 seconds before first spawn after restart
+        nextZapSpawnTime = 0 + 3.0 // Wait 3 seconds before first spawn after restart
         
         // Reset managers
         timerManager.startTimer()
+        currentLevelLabel.text = "Level: 1"
         audioManager.changeMusic(to: .game)
         
         // Reset player position
