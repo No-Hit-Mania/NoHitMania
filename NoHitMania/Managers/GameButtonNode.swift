@@ -1,3 +1,4 @@
+<<<<<<< HEAD:NoHitMania/Managers/GameButtonNode.swift
 //
 //  GameButtonNode.swift
 //  NoHitMania
@@ -18,6 +19,19 @@ class GameButtonNode: SKSpriteNode {
         self.pressed = SKTexture(imageNamed: pressedImageNamed)
 
         super.init(texture: normal, color: .clear, size: normal.size())
+=======
+import SpriteKit
+
+class GameButtonNode: SKSpriteNode {
+    var normalBtn: SKTexture
+    var pressedBtn: SKTexture
+    var action: (() -> Void)?
+
+    init(normalImageNamed: String, pressedImageNamed: String) {
+        self.normalBtn = SKTexture(imageNamed: normalImageNamed)
+        self.pressedBtn = SKTexture(imageNamed: pressedImageNamed)
+        super.init(texture: normalBtn, color: .clear, size: normalBtn.size())
+>>>>>>> main:NoHitMania/GameButtonNode.swift
         isUserInteractionEnabled = true
     }
 
@@ -26,6 +40,7 @@ class GameButtonNode: SKSpriteNode {
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+<<<<<<< HEAD:NoHitMania/Managers/GameButtonNode.swift
         texture = pressed
     }
 
@@ -37,6 +52,14 @@ class GameButtonNode: SKSpriteNode {
                 action?()
             }
         }
+=======
+        texture = pressedBtn
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        texture = normalBtn
+        action?()
+>>>>>>> main:NoHitMania/GameButtonNode.swift
     }
 
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {

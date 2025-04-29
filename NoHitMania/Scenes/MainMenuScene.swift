@@ -7,100 +7,84 @@
 
 
 import SpriteKit
-import AVFoundation
 
 class MainMenuScene: SKScene {
 
     override func didMove(to view: SKView) {
-        backgroundColor = .clear
-
-        MusicManager.shared.playMusic(named: "MainMenuTheme")
-
-        addTitle()
-        addButtons()
-        addStickman()
+        backgroundColor = .black
+        setupTitle()
+        setupButtons()
+        setupStickman()
+        MusicManager.shared.playMusic(named: "MenuTheme")
     }
 
-    private func addTitle() {
-        let title = SKSpriteNode(imageNamed: "GameTitle")
-        title.position = CGPoint(x: size.width / 2, y: size.height * 0.85)
-
-        // Scale the title based on screen width
-        let desiredWidth = size.width * 0.7
-        let originalWidth = title.texture?.size().width ?? 1
-        let scale = desiredWidth / originalWidth
-        title.setScale(scale)
-
-        addChild(title)
+    private func setupTitle() {
+        let titleNode = SKSpriteNode(imageNamed: "GameTitle")
+        titleNode.position = CGPoint(x: size.width / 2, y: size.height * 0.8)
+        titleNode.setScale(0.6)
+        addChild(titleNode)
     }
 
-    private func addButtons() {
-        let buttonInfo: [(String, String, String)] = [
-            ("PlayButton", "PlayButtonPressed", "Play"),
-            ("ShopButton", "ShopButtonPressed", "Shop"),
-            ("SettingsButton", "SettingsButtonPressed", "Settings")
+    private func setupButtons() {
+        let buttonNames = [
+            ("PlayButton", "PlayButtonPressed"),
+            ("ShopButton", "ShopButtonPressed"),
+            ("SettingsButton", "SettingsButtonPressed")
         ]
 
-        let desiredWidth = size.width * 0.5
-        let spacing = desiredWidth * 0.4 // vertical space between buttons
+        let spacing: CGFloat = 20
+        let totalHeight = CGFloat(buttonNames.count) * 80 + spacing * CGFloat(buttonNames.count - 1)
+        let startY = size.height / 2 + totalHeight / 2 - 40
 
-        for (index, info) in buttonInfo.enumerated() {
-            let button = GameButtonNode(normalImageNamed: info.0, pressedImageNamed: info.1)
+        for (index, (normal, pressed)) in buttonNames.enumerated() {
+            let button = GameButtonNode(normalImageNamed: normal, pressedImageNamed: pressed)
+            button.setScale(0.5)
 
-            // Scale the button based on screen size
-            let originalWidth = button.texture?.size().width ?? 1
-            let scale = desiredWidth / originalWidth
-            button.setScale(scale)
-
-            // Position the button
             button.position = CGPoint(
                 x: size.width / 2,
-                y: size.height * 0.55 - CGFloat(index) * spacing
+                y: startY - CGFloat(index) * (80 + spacing)
             )
 
             button.action = {
-                self.run(SKAction.playSoundFileNamed("Click.wav", waitForCompletion: false))
-                print("\(info.2) button pressed")
-                // TODO: Add scene transitions here
+                switch index {
+                case 0:
+                    print("Play button tapped")
+                case 1:
+                    print("Shop button tapped")
+                case 2:
+                    print("Settings button tapped")
+                default:
+                    break
+                }
             }
 
             addChild(button)
         }
     }
 
-    private func addStickman() {
-        let stickman = SKSpriteNode(imageNamed: "StickmanIdle1")
-        stickman.name = "Stickman"
-        stickman.position = CGPoint(x: size.width / 2, y: size.height * 0.15)
-
-        // Scale the stickman based on screen width
-        let desiredWidth = size.width * 0.3
-        let originalWidth = stickman.texture?.size().width ?? 1
-        let scale = desiredWidth / originalWidth
-        stickman.setScale(scale)
-
+    private func setupStickman() {
+        let stickman = SKSpriteNode(imageNamed: "StickmanIdle")
+        stickman.name = "stickman"
+        stickman.position = CGPoint(x: size.width / 2, y: size.height * 0.1)
+        stickman.setScale(0.5)
         addChild(stickman)
-
-        // Idle animation
-        var frames: [SKTexture] = []
-        for i in 1...3 {
-            frames.append(SKTexture(imageNamed: "StickmanIdle\(i)"))
-        }
-
-        let idleAnimation = SKAction.repeatForever(
-            SKAction.animate(with: frames, timePerFrame: 0.2)
-        )
-        stickman.run(idleAnimation)
     }
 
+    // No audio logic for stickman or button taps
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
-        let node = atPoint(location)
+        let nodesAtPoint = nodes(at: location)
 
-        if node.name == "Stickman" {
-            run(SKAction.playSoundFileNamed("StickmanSound.wav", waitForCompletion: false))
-            print("Stickman tapped!")
+        for node in nodesAtPoint {
+            if node.name == "stickman" {
+                print("Stickman tapped")
+                // Add visuals or animation if needed
+            }
         }
     }
+    
+    
+
+    
 }

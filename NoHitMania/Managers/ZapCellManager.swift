@@ -54,12 +54,12 @@ class ZapCellManager {
         var playerHit = false
         var cellsToRemove: [Int] = []
 
+
 //      TODO: imo its a lot cleaner with these prints commented out but u do u
 //        print("ZapCellManager: Current Time: \(currentTime)")
         for i in 0..<zapCells.count {
             let zapCell = zapCells[i]
 //            print("Zap Cell (\(zapCell.row), \(zapCell.col)) - Activation Time: \(zapCell.nextActivationTime)")
-
             if currentTime >= zapCell.nextActivationTime {
                 print("Activating zap cell at (\(zapCell.row),\(zapCell.col))")
                 let didHitPlayer = activateZapCell(row: zapCell.row, col: zapCell.col, playerPosition: playerPosition)
