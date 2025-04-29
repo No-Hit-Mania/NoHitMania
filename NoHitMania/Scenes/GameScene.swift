@@ -9,250 +9,218 @@ import SpriteKit
 import Combine
 
 class GameScene: SKScene {
-    // timer related things
-    private var scoreTime: TimeInterval = 0.0
-    private var accumulatedTime: TimeInterval = 0.0
-    private var startTime: Date? = nil
-    private var isTimerRunning: Bool = false
-    // change double to change framerate
-    private var timer = Timer.publish(every: 1.0/60.0, on: .main, in: .common).autoconnect()
+    // Managers
+    private var gridManager: GridManager!
+    private var playerManager: PlayerManager!
+    private var zapCellManager: ZapCellManager!
+    private var timerManager: GameTimerManager!
+    private var audioManager: AudioManager!
+    
+    // UI elements
     private var scoreTimerLabel: SKLabelNode!
-    private var gameTimerSubscription: AnyCancellable?
-
-    private var secondsBetweenLevels: Int = 5
-
-    // Touch Screen configs
-    private var startTouchPosition: CGPoint?
-
-    // Grid configuration
-    private let gridSize = 5
-    private var cellSize: CGFloat = 0
-    private var gridOrigin = CGPoint.zero
-
-    // Player node
-    private var playerNode: SKSpriteNode!
-
-    // Player grid position (0-4, 0-4)
-    private var playerGridPosition = GridPosition(x: 2, y: 2)
-
-    // Player logic
-    private var playerAlive:Bool = true
-    private var currentLevel: Int = 1
     private var currentLevelLabel: SKLabelNode!
-
-    // BGM of the game scene
-    private var backgroundMusicNode: SKAudioNode?
-
-    // when scene appears
+    
+    // Touch handling
+    private var startTouchPosition: CGPoint?
+    
+    // Game state
+    private var playerAlive: Bool = true
+    private var lastUpdateTime: TimeInterval = 0
+    private var gameStartTime: TimeInterval = 0
+    private var elapsedTime: TimeInterval = 0
+    
+    // Zap cell spawning
+    private var nextZapSpawnTime: TimeInterval = 3.0 // Initial spawn after 3 seconds
+    private var zapSpawnInterval: TimeInterval = 5.0 // Base interval between spawns
+    
+    // MARK: - Scene Lifecycle
+    
     override func didMove(to view: SKView) {
         backgroundColor = .black
-        setupGrid()
-        createPlayer()
-        setupTimer()
-        setupBackgroundMusic()
-        startTimer() // Start the timer when the scene loads
-
+        
+        // Initialize managers
+        setupManagers()
+        
+        // Setup UI
+        setupUI()
+        
+        // Record start time and start timer
+        gameStartTime = CACurrentMediaTime()
+        timerManager.startTimer()
     }
     
-    private func startTimer() {
-        accumulatedTime = 0.0
-        scoreTime = 0.0
-        startTime = Date()
-        isTimerRunning = true
-        gameTimerSubscription = timer
-            .sink { [weak self] _ in
-                self?.timerUpdate()
-            }
-    }
-
-    private func pauseTimer() {
-        if isTimerRunning, let start = startTime {
-            // Add up the time since last start/pause
-            accumulatedTime += Date().timeIntervalSince(start)
-            startTime = nil
-            isTimerRunning = false
-            gameTimerSubscription?.cancel()
-            gameTimerSubscription = nil
-            print("pauseTimer: at: \(formattedTime(elapsed: accumulatedTime))")
-        }
-    }
-
-    private func resumeTimer() {
-        if !isTimerRunning {
-            startTime = Date() // Set a new start time for the current run
-            isTimerRunning = true
-            gameTimerSubscription = timer
-                .sink { [weak self] _ in
-                    self?.timerUpdate()
-                }
-            print("pauseTimer: at: \(formattedTime(elapsed: accumulatedTime))")
-        }
-    }
-
-    private func timerUpdate() {
-        if isTimerRunning {
-            if playerAlive {
-                guard let startTime = self.startTime, let scoreTimerLabel = self.scoreTimerLabel else {
-                    return
-                }
-                // Calculate the elapsed time since the current start and add the accumulated time
-                let elapsedTime = Date().timeIntervalSince(startTime)
-                self.scoreTime = elapsedTime + self.accumulatedTime
-                scoreTimerLabel.text = self.formattedTime(elapsed: self.scoreTime)
-
-                if self.currentLevel < 5 {
-                    let new = (Int(self.scoreTime)/self.secondsBetweenLevels) + 1
-                    if new > self.currentLevel {
-                        self.currentLevel += 1
-                        self.currentLevelLabel.text = "Level: \(currentLevel)"
-                        print("timerUpdate: level up \(currentLevel)")
-                    }
-                }
-            } else {
-                // TODO: Add game over screen
-            }
-        }
-    }
-    private func setupGrid() {
-        // Calculate cell size based on scene size
-        cellSize = min(size.width, size.height) / CGFloat(gridSize)
+    // MARK: - Setup Methods
+    
+    private func setupManagers() {
+        // Create grid manager and set up grid
+        gridManager = GridManager(scene: self, gridSize: GameConstants.defaultGridSize)
+        let (cellSize, gridOrigin) = gridManager.setupGrid()
         
-        // Calculate grid origin (top-left corner)
-        gridOrigin = CGPoint(
-            x: (size.width - (CGFloat(gridSize) * cellSize)) / 2,
-            y: (size.height - (CGFloat(gridSize) * cellSize)) / 2
+        // Create player manager
+        playerManager = PlayerManager(
+            scene: self,
+            gridSize: GameConstants.defaultGridSize,
+            cellSize: cellSize,
+            gridOrigin: gridOrigin
         )
-        
-        // Draw grid
-        for row in 0..<gridSize {
-            for col in 0..<gridSize {
-                let cellRect = CGRect(
-                    x: gridOrigin.x + (CGFloat(col) * cellSize),
-                    y: gridOrigin.y + (CGFloat(row) * cellSize),
-                    width: cellSize,
-                    height: cellSize
-                )
-                
-                let cell = SKShapeNode(rect: cellRect)
-                cell.strokeColor = .white
-                cell.lineWidth = 1
-                cell.fillColor = UIColor.systemPink
-                addChild(cell)
-            }
+        playerManager.onPlayerDeath = { [weak self] in
+            self?.handlePlayerDeath()
         }
+        
+        // Create zap cell manager
+        zapCellManager = ZapCellManager(scene: self)
+        
+        // Create timer manager
+        timerManager = GameTimerManager()
+        timerManager.onTimerUpdate = { [weak self] timeString in
+            self?.scoreTimerLabel.text = timeString
+        }
+        timerManager.onLevelUpdate = { [weak self] level in
+            self?.currentLevelLabel.text = "Level: \(level)"
+            self?.updateSpawnRateForLevel(level)
+        }
+        
+        // Create audio manager and setup music
+        audioManager = AudioManager(scene: self)
+        audioManager.setupBackgroundMusic()
     }
-
-    private func createPlayer() {
-        // Create player slightly smaller than cell
-        let playerSize = cellSize * 0.8
-        playerNode = SKSpriteNode(imageNamed: "pixil-frame-0")
-        playerNode.size = CGSize(width: playerSize, height: playerSize)
-
-        // Position player in the center cell initially
-        updatePlayerNodePosition()
-
-        addChild(playerNode)
-    }
-
-    private func setupTimer() {
-        // timerLabel settings
+    
+    private func setupUI() {
+        // Timer label
         scoreTimerLabel = SKLabelNode(text: "00:00.00")
         scoreTimerLabel.fontColor = .white
         scoreTimerLabel.fontSize = 30
         scoreTimerLabel.position = CGPoint(x: size.width / 2, y: size.height - 100)
         scoreTimerLabel.fontName = "Helvetica-Bold"
         addChild(scoreTimerLabel)
-
-        // levelLabel settings
-        currentLevelLabel = SKLabelNode(text: "Level: \(currentLevel)")
+        
+        // Level label
+        currentLevelLabel = SKLabelNode(text: "Level: 1")
         currentLevelLabel.fontColor = .white
         currentLevelLabel.fontName = "Helvetica-Bold"
         currentLevelLabel.fontSize = 25
         currentLevelLabel.position = CGPoint(x: size.width / 2, y: size.height - 135)
-
         addChild(currentLevelLabel)
-
-        isTimerRunning = false
     }
+    
+    // MARK: - Game Logic
+    
+    private func handlePlayerDeath() {
+//        playerAlive = false
+        timerManager.pauseTimer()
+        audioManager.changeMusic(to: .pause)
+        
+        restartGame()
 
-    private func updatePlayerNodePosition() {
-        // Convert grid position to scene position
-        let pixelX = gridOrigin.x + (CGFloat(playerGridPosition.x) + 0.5) * cellSize
-        let pixelY = gridOrigin.y + (CGFloat(playerGridPosition.y) + 0.5) * cellSize
-
-        // Create move action
-        let moveAction = SKAction.move(to: CGPoint(x: pixelX, y: pixelY), duration: 0.2)
-        moveAction.timingMode = .easeOut
-
-        playerNode.run(moveAction)
+        // Add any additional death handling here
+        // For example, showing game over screen
     }
-
-    private func movePlayer(direction: String) {
-        var moved = false
-
-        switch direction {
-        case "Up":
-            if playerGridPosition.y < gridSize - 1 {
-                playerGridPosition.y += 1
-                moved = true
-            }
-        case "Down":
-            if playerGridPosition.y > 0 {
-                playerGridPosition.y -= 1
-                moved = true
-            }
-        case "Left":
-            if playerGridPosition.x > 0 {
-                playerGridPosition.x -= 1
-                moved = true
-            }
-        case "Right":
-            if playerGridPosition.x < gridSize - 1 {
-                playerGridPosition.x += 1
-                moved = true
-            }
-        default:
-            break
+    
+    // Update zap cell spawn rate based on the current level
+    private func updateSpawnRateForLevel(_ level: Int) {
+        // Decrease spawn interval as level increases (faster spawning)
+        // But ensure it doesn't go below a minimum threshold
+        let minSpawnInterval: TimeInterval = 1.0 // Fastest spawn rate (1 per second)
+        let decreaseFactor: TimeInterval = 0.5 // How much to decrease per level
+        
+        zapSpawnInterval = max(zapSpawnInterval - decreaseFactor, minSpawnInterval)
+        
+        // Also decrease warning time as levels increase
+        let chargeTimeReduction = min(0.1 * Double(level - 1), 0.8) // Reduce charge time by up to 80%
+        zapCellManager.adjustChargeTime(reductionFactor: chargeTimeReduction)
+    }
+    
+    // Spawn a new zap cell at a random position
+    private func spawnRandomZapCell() {
+        // Get the grid size
+        let gridSize = GameConstants.defaultGridSize
+        
+        // Get current player position to avoid spawning there
+        let playerPos = playerManager.getPlayerPosition()
+        
+        // Try to find a valid position that's not where the player is
+        var row = Int.random(in: 0..<gridSize)
+        var col = Int.random(in: 0..<gridSize)
+        
+        // Simple retry to avoid placing on player
+        let maxAttempts = 5
+        var attempts = 0
+        
+        while (row == playerPos.y && col == playerPos.x) && attempts < maxAttempts {
+            row = Int.random(in: 0..<gridSize)
+            col = Int.random(in: 0..<gridSize)
+            attempts += 1
         }
-
-        if moved {
-            updatePlayerNodePosition()
-            print("movePlayer: Moved \(direction)")
-        } else {
-            print("movePlayer: Can't move \(direction)")
+        
+        // Only add if we found a non-player position or we're out of attempts
+        if row != playerPos.y || col != playerPos.x || attempts >= maxAttempts {
+            zapCellManager.addZapCell(row: row, col: col, gameTime: elapsedTime)
         }
     }
-
+    
+    // MARK: - Update Loop
+    
+    override func update(_ currentTime: TimeInterval) {
+        if lastUpdateTime == 0 {
+            lastUpdateTime = currentTime
+            gameStartTime = currentTime
+            return
+        }
+        
+//        let deltaTime = currentTime - lastUpdateTime
+        lastUpdateTime = currentTime
+        
+        elapsedTime = currentTime - gameStartTime
+        
+        // Check if it's time to spawn a new zap cell
+        if playerAlive && elapsedTime >= nextZapSpawnTime {
+            spawnRandomZapCell()
+            nextZapSpawnTime = elapsedTime + zapSpawnInterval
+        }
+        
+        // Update zap cells and check if player was hit
+        if playerAlive {
+            let playerPosition = playerManager.getPlayerPosition()
+            let playerHit = zapCellManager.update(
+                currentTime: elapsedTime,
+                playerPosition: playerPosition
+            )
+            
+            if playerHit {
+                playerManager.playerDie()
+            }
+        }
+    }
+    
+    // MARK: - Touch Handling
+    
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         startTouchPosition = touch.location(in: self)
     }
-
+    
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let touch = touches.first, let start = startTouchPosition else { return }
+        guard let touch = touches.first, let start = startTouchPosition, playerAlive else { return }
         let end = touch.location(in: self)
         
         // Calculate horizontal and vertical differences
         let dx = end.x - start.x
         let dy = end.y - start.y
         
-        // Set minimum swipe distance to recognize a swipe
-        let minSwipeDistance: CGFloat = 20
-        
         // Determine if the swipe is more horizontal or vertical
-        if abs(dx) > abs(dy) && abs(dx) > minSwipeDistance {
+        if abs(dx) > abs(dy) && abs(dx) > GameConstants.minSwipeDistance {
             // Horizontal swipe
             if dx > 0 {
-                movePlayer(direction: "Right")
+                playerManager.movePlayer(direction: "Right")
             } else {
-                movePlayer(direction: "Left")
+                playerManager.movePlayer(direction: "Left")
             }
-        } else if abs(dy) > abs(dx) && abs(dy) > minSwipeDistance {
+        } else if abs(dy) > abs(dx) && abs(dy) > GameConstants.minSwipeDistance {
             // Vertical swipe
             if dy > 0 {
-                movePlayer(direction: "Up")
+                playerManager.movePlayer(direction: "Up")
             } else {
-                movePlayer(direction: "Down")
+                playerManager.movePlayer(direction: "Down")
             }
         }
         
