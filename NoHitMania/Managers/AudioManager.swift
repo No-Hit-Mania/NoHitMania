@@ -11,8 +11,9 @@ class AudioManager {
     
     // Types of music available in the game
     enum MusicType: String {
-        case game = "gameMusicLoopable.mp3"
-        case pause = "pauseMusic.mp3"
+        case game = "GameMusic.wav"
+        case pause = "PauseMusic.mp3"
+        case MainMenuScene = "MenuTheme.mp3"
         case none = ""
     }
     
