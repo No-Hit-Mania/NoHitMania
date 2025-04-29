@@ -82,7 +82,7 @@ class GameScene: SKScene {
         }
     }
 
-    private func resumeTimer() {
+    public func resumeTimer() {
         if !isTimerRunning {
             startTime = Date() // Set a new start time for the current run
             isTimerRunning = true
@@ -240,7 +240,10 @@ class GameScene: SKScene {
 
         if node.name == "pauseButton" {
             pauseTimer()
-            view?.presentScene(OptionsScene(size: self.view!.bounds.size))
+            let modal = OptionsScene(size: self.size)
+            modal.name = "optionsModal"
+            addChild(modal)
+
         }
         let end = touch.location(in: self)
         

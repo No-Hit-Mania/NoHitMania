@@ -7,61 +7,99 @@
 
 import SpriteKit
 
-class OptionsScene: SKScene {
+class OptionsScene: SKNode {
     private var slider1Handle: SKShapeNode!
     private var slider2Handle: SKShapeNode!
     private var activeSlider: SKShapeNode?
     private var slider1ValueLabel: SKLabelNode!
     private var slider2ValueLabel: SKLabelNode!
-    var getDirectionCallback: ((String) -> Void)?
+    private var modalPanel: SKShapeNode!
+    private var closeButton: SKLabelNode!
+    
+    init(size: CGSize) {
+        super.init()
+        self.isUserInteractionEnabled = true
+        setupModal(size: size)
+    }
 
-    override func didMove(to view: SKView) {
-        backgroundColor = .white
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
+
+    func setupModal(size: CGSize) {
+        // Dimmed background
+        let dim = SKShapeNode(rectOf: CGSize(width: size.width, height: size.height))
+        dim.fillColor = SKColor.black.withAlphaComponent(0.5)
+        dim.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        dim.zPosition = 0
+        addChild(dim)
+        
+        // Modal panel
+        let panelSize = CGSize(width: size.width * 0.8, height: size.height * 0.7)
+        modalPanel = SKShapeNode(rectOf: panelSize, cornerRadius: 20)
+        modalPanel.fillColor = .white
+        modalPanel.strokeColor = .gray
+        modalPanel.lineWidth = 4
+        modalPanel.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        modalPanel.zPosition = 1
+        addChild(modalPanel)
+        
         // Title
         let title = SKLabelNode(text: "Settings")
-        title.fontSize = 66
+        title.fontSize = 50
         title.fontColor = .black
         title.fontName = "HelveticaNeue-Bold"
-        title.position = CGPoint(x: size.width / 2, y: size.height - 110)
-        addChild(title)
+        title.position = CGPoint(x: 0, y: panelSize.height / 2 - 80)
+        modalPanel.addChild(title)
         
-        addSliderTitle("Music", valueLabel: &slider1ValueLabel, y: size.height * 0.68)
-        createSlider(y: size.height * 0.63, name: "slider1")
-
-        addSliderTitle("Sound Effects", valueLabel: &slider2ValueLabel, y: size.height * 0.48)
-        createSlider(y: size.height * 0.43, name: "slider2")
+        // Sliders
+        addSliderTitle("Music", valueLabel: &slider1ValueLabel, y: 80)
+        createSlider(y: 40, name: "slider1")
+        
+        addSliderTitle("Sound Effects", valueLabel: &slider2ValueLabel, y: -80)
+        createSlider(y: -120, name: "slider2")
+        
+        // Close Button
+        closeButton = SKLabelNode(text: "Close")
+        closeButton.fontSize = 30
+        closeButton.fontColor = .red
+        closeButton.fontName = "HelveticaNeue-Bold"
+        closeButton.position = CGPoint(x: 0, y: -panelSize.height / 2 + 50)
+        closeButton.name = "closeButton"
+        modalPanel.addChild(closeButton)
     }
-    func addSliderTitle(_ text: String, valueLabel: inout SKLabelNode!, y: CGFloat) {
-            let titleLabel = SKLabelNode(text: text)
-            titleLabel.fontSize = 35
-            titleLabel.fontColor = .black
-            titleLabel.fontName = "HelveticaNeue"
-            titleLabel.horizontalAlignmentMode = .left
-            titleLabel.position = CGPoint(x: size.width / 2 - 180, y: y)
-            addChild(titleLabel)
 
-            valueLabel = SKLabelNode(text: "50")
-            valueLabel.fontSize = 35
-            valueLabel.fontColor = .black
-            valueLabel.fontName = "HelveticaNeue"
-            valueLabel.horizontalAlignmentMode = .right
-            valueLabel.position = CGPoint(x: size.width / 2 + 180, y: y)
-            addChild(valueLabel)
-        }
+    func addSliderTitle(_ text: String, valueLabel: inout SKLabelNode!, y: CGFloat) {
+        let titleLabel = SKLabelNode(text: text)
+        titleLabel.fontSize = 30
+        titleLabel.fontColor = .black
+        titleLabel.fontName = "HelveticaNeue"
+        titleLabel.horizontalAlignmentMode = .left
+        titleLabel.position = CGPoint(x: -150, y: y)
+        modalPanel.addChild(titleLabel)
+
+        valueLabel = SKLabelNode(text: "50")
+        valueLabel.fontSize = 30
+        valueLabel.fontColor = .black
+        valueLabel.fontName = "HelveticaNeue"
+        valueLabel.horizontalAlignmentMode = .right
+        valueLabel.position = CGPoint(x: 150, y: y)
+        modalPanel.addChild(valueLabel)
+    }
 
     func createSlider(y: CGFloat, name: String) {
-        let track = SKShapeNode(rectOf: CGSize(width: 370, height: 12), cornerRadius: 6)
+        let track = SKShapeNode(rectOf: CGSize(width: 300, height: 10), cornerRadius: 5)
         track.fillColor = .blue
-        track.position = CGPoint(x: size.width / 2, y: y)
+        track.position = CGPoint(x: 0, y: y)
         track.name = "\(name)_track"
-        addChild(track)
+        modalPanel.addChild(track)
 
-        let handle = SKShapeNode(circleOfRadius: 10)
+        let handle = SKShapeNode(circleOfRadius: 12)
         handle.fillColor = .black
-        handle.position = CGPoint(x: track.position.x, y: y)
+        handle.position = CGPoint(x: 0, y: y)
         handle.name = name
-        addChild(handle)
+        modalPanel.addChild(handle)
 
         if name == "slider1" {
             slider1Handle = handle
@@ -71,27 +109,32 @@ class OptionsScene: SKScene {
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let touch = touches.first {
-            let location = touch.location(in: self)
-            if slider1Handle.contains(location) {
+        guard let touch = touches.first else { return }
+        let location = touch.location(in: modalPanel)
+
+        if let node = modalPanel.atPoint(location) as? SKShapeNode {
+            if node == slider1Handle {
                 activeSlider = slider1Handle
-            } else if slider2Handle.contains(location) {
+            } else if node == slider2Handle {
                 activeSlider = slider2Handle
             }
+        }
+
+        if let label = modalPanel.atPoint(location) as? SKLabelNode, label.name == "closeButton" {
+            (self.scene as? GameScene)?.resumeTimer()
+            self.removeFromParent()
         }
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first, let handle = activeSlider else { return }
-        let location = touch.location(in: self)
+        let location = touch.location(in: modalPanel)
 
-        let minX = size.width / 2 - 125
-        let maxX = size.width / 2 + 125
+        let minX: CGFloat = -150
+        let maxX: CGFloat = 150
         let clampedX = min(max(location.x, minX), maxX)
-
         handle.position.x = clampedX
 
-        // Update value label
         let percentage = Int(((clampedX - minX) / (maxX - minX)) * 100)
         if handle == slider1Handle {
             slider1ValueLabel.text = "\(percentage)"
@@ -99,6 +142,7 @@ class OptionsScene: SKScene {
             slider2ValueLabel.text = "\(percentage)"
         }
     }
+
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         activeSlider = nil
     }
@@ -107,3 +151,4 @@ class OptionsScene: SKScene {
         activeSlider = nil
     }
 }
+
