@@ -22,19 +22,28 @@ class MusicManager {
     ///   - fadeDuration: How long the fade-in takes.
     ///   - loop: Whether to loop the music infinitely.
     func playMusic(named fileName: String, fadeDuration: TimeInterval = 1.0, loop: Bool = true) {
-        guard let url = Bundle.main.url(forResource: fileName, withExtension: "mp3") else {
+        let supportedExtensions = ["mp3", "wav"]
+        var url: URL? = nil
+
+        for ext in supportedExtensions {
+            if let foundURL = Bundle.main.url(forResource: fileName, withExtension: ext) {
+                url = foundURL
+                break
+            }
+        }
+
+        guard let audioURL = url else {
             print("❌ Music file not found: \(fileName)")
             return
         }
 
         do {
-            let player = try AVAudioPlayer(contentsOf: url)
+            let player = try AVAudioPlayer(contentsOf: audioURL)
             player.numberOfLoops = loop ? -1 : 0
             player.volume = 0
             player.prepareToPlay()
             player.play()
 
-            // Stop any existing music and fade in new one
             audioPlayer?.stop()
             audioPlayer = player
             fade(toVolume: 1.0, duration: fadeDuration)
@@ -42,6 +51,7 @@ class MusicManager {
             print("❌ Error loading music: \(error.localizedDescription)")
         }
     }
+
 
     /// Fades out and stops the current music.
     /// - Parameter fadeDuration: How long the fade-out takes.
