@@ -7,15 +7,10 @@ import SwiftUI
 import SpriteKit
 
 struct ContentView: View {
-    var scene: SKScene {
-        let scene = GameScene()
-        scene.size = UIScreen.main.bounds.size
-        scene.scaleMode = .fill
-        return scene
-    }
-    
+    @State var scene: SKScene = SceneSetup()
+
     var body: some View {
-        VStack {
+        ZStack {
             SpriteView(scene: scene)
                 .ignoresSafeArea()
         }
@@ -24,4 +19,13 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+}
+
+func SceneSetup() -> SKScene {
+    let scene = GameScene()
+//        scene.size = CGSize(width: 300, height: 300)
+//        let scene = GameScene()
+    scene.size = UIScreen.main.bounds.size
+    scene.scaleMode = .fill
+    return scene
 }

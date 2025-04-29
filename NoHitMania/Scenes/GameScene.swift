@@ -88,7 +88,7 @@ class GameScene: SKScene {
     private func setupUI() {
         // Timer label
         scoreTimerLabel = SKLabelNode(text: "00:00.00")
-        scoreTimerLabel.fontColor = .white
+        scoreTimerLabel.fontColor = .black
         scoreTimerLabel.fontSize = 30
         scoreTimerLabel.position = CGPoint(x: size.width / 2, y: size.height - 100)
         scoreTimerLabel.fontName = "Helvetica-Bold"
