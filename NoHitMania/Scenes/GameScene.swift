@@ -13,7 +13,7 @@ class GameScene: SKScene {
     private var gridManager: GridManager!
     private var playerManager: PlayerManager!
     private var zapCellManager: ZapCellManager!
-    private var timerManager: GameTimerManager!
+    public var timerManager: GameTimerManager!
     private var audioManager: AudioManager!
     
     // UI elements
@@ -36,7 +36,7 @@ class GameScene: SKScene {
     // MARK: - Scene Lifecycle
     
     override func didMove(to view: SKView) {
-        backgroundColor = .black
+        backgroundColor = .white
         
         // Initialize managers
         setupManagers()
@@ -83,8 +83,19 @@ class GameScene: SKScene {
         // Create audio manager and setup music
         audioManager = AudioManager(scene: self)
         audioManager.setupBackgroundMusic()
+        addPauseButton()
     }
     
+    private func addPauseButton() {
+        let texture = SKTexture(imageNamed: "pause_icon")
+        let pauseNode = SKSpriteNode(texture: texture)
+        pauseNode.name = "pauseButton"
+        pauseNode.size = CGSize(width: 50, height: 50)
+        pauseNode.position = CGPoint(x: size.width / 10, y: size.height - 60)
+        pauseNode.zPosition = 100
+        addChild(pauseNode)
+    }
+
     private func setupUI() {
         // Timer label
         scoreTimerLabel = SKLabelNode(text: "00:00.00")
@@ -96,7 +107,7 @@ class GameScene: SKScene {
         
         // Level label
         currentLevelLabel = SKLabelNode(text: "Level: 1")
-        currentLevelLabel.fontColor = .white
+        currentLevelLabel.fontColor = .black
         currentLevelLabel.fontName = "Helvetica-Bold"
         currentLevelLabel.fontSize = 25
         currentLevelLabel.position = CGPoint(x: size.width / 2, y: size.height - 135)
@@ -201,6 +212,16 @@ class GameScene: SKScene {
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first, let start = startTouchPosition, playerAlive else { return }
+        let location = touch.location(in: self)
+        let node = self.atPoint(location)
+
+        if node.name == "pauseButton" {
+            timerManager.pauseTimer()
+            let modal = OptionsScene(size: self.size)
+            modal.name = "optionsModal"
+            addChild(modal)
+
+        }
         let end = touch.location(in: self)
         
         // Calculate horizontal and vertical differences

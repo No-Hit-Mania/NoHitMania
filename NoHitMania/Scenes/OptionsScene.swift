@@ -15,6 +15,7 @@ class OptionsScene: SKNode {
     private var slider2ValueLabel: SKLabelNode!
     private var modalPanel: SKShapeNode!
     private var closeButton: SKLabelNode!
+    private var quitButton: SKLabelNode!
     
     init(size: CGSize) {
         super.init()
@@ -63,10 +64,20 @@ class OptionsScene: SKNode {
         // Close Button
         closeButton = SKLabelNode(text: "Close")
         closeButton.fontSize = 30
+        closeButton.fontColor = .orange
+        closeButton.fontName = "HelveticaNeue-Bold"
+        closeButton.position = CGPoint(x: 0, y: -panelSize.height / 2 + 75)
+        closeButton.name = "closeButton"
+        modalPanel.addChild(closeButton)
+        
+        //Quit Button
+        // Close Button
+        closeButton = SKLabelNode(text: "Quit")
+        closeButton.fontSize = 30
         closeButton.fontColor = .red
         closeButton.fontName = "HelveticaNeue-Bold"
         closeButton.position = CGPoint(x: 0, y: -panelSize.height / 2 + 50)
-        closeButton.name = "closeButton"
+        closeButton.name = "quitButton"
         modalPanel.addChild(closeButton)
     }
 
@@ -121,7 +132,11 @@ class OptionsScene: SKNode {
         }
 
         if let label = modalPanel.atPoint(location) as? SKLabelNode, label.name == "closeButton" {
-            (self.scene as? GameScene)?.resumeTimer()
+            (self.scene as? GameScene)?.timerManager.resumeTimer()
+            self.removeFromParent()
+        }
+        if let label = modalPanel.atPoint(location) as? SKLabelNode, label.name == "quitButton" {
+            
             self.removeFromParent()
         }
     }
