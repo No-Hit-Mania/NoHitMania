@@ -9,7 +9,7 @@ import SpriteKit
 
 class PlayerManager {
     // Player node
-    private var playerNode: SKSpriteNode!
+    public var playerNode: SKSpriteNode!
     
     // Player grid position
     private var playerGridPosition = GridPosition(x: 2, y: 2)

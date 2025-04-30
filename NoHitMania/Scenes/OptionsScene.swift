@@ -121,7 +121,7 @@ class OptionsScene: SKNode {
         }
 
         if let label = modalPanel.atPoint(location) as? SKLabelNode, label.name == "closeButton" {
-            (self.scene as? GameScene)?.resumeTimer()
+            (self.scene as? GameScene)?.timerManager.resumeTimer()
             self.removeFromParent()
         }
     }
