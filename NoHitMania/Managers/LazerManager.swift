@@ -142,17 +142,19 @@ class LazerManager {
             if elapsedTime >= lazerBeamFullDuration {
                 isActive.toggle()
                 beam.removeFromParent()
-            } else if (elapsedTime >= (4/6) * lazerBeamFullDuration ) {
+            } else if (elapsedTime > (8/12) * lazerBeamFullDuration ) {
                 // killing
-                if (beam.parent == nil) {
-                    scene?.addChild(beam)
-                }
-                
+                // needs to be fixed bcuz it will always bring the lazer back even if we move..
                 if beam.intersects(playerManager.playerNode) {
                     return true
                 }
                 
-            } else {
+            } else if (elapsedTime >= (6/12) * lazerBeamFullDuration) && (elapsedTime <= (8/12) * lazerBeamFullDuration) {
+                if (beam.parent == nil) {
+                    scene?.addChild(beam)
+                }
+            }
+            else {
                 if elapsedTime.truncatingRemainder(dividingBy: 0.5) == 0 {
                     leftNode.texture = SKTexture(imageNamed: "NoHitManiaNub4")
                 }
