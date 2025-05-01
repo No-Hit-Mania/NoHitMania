@@ -91,8 +91,8 @@ class GameScene: SKScene {
 
         // Create hazard managers
         zapCellManager = ZapCellManager(scene: self)
-        lazerManager = LazerManager(scene: self, gridManager: gridManager, audioManager: audioManager)
-        boulderManager = BoulderManager(scene: self, gridManager: gridManager, audioManager: audioManager)
+        lazerManager = LazerManager(scene: self, gridManager: gridManager, audioManager: AudioManager.shared)
+        boulderManager = BoulderManager(scene: self, currentLevel: 1, gridManager: gridManager, audioManager: AudioManager.shared)
     }
 
     
