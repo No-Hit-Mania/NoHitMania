@@ -119,16 +119,12 @@ class LazerManager {
         let moveRightNubAction = SKAction.moveTo(y: newYPosition, duration: 0.2)
         let moveBeamAction = SKAction.moveTo(y: newYPosition, duration: 0.2)
         
-        // Run the actions on the respective nodes
-        if currentLevel != 5 {
-            beam.removeFromParent()
-             
-            beam.position = CGPoint(x: gridOrigin.x + leftNode.size.width / 2, y: newYPosition)
-            
-        } else {
-            beam.run(moveBeamAction)
-        }
         
+        // Despawn lazer while its moving:
+        beam.removeFromParent()
+        beam.position = CGPoint(x: gridOrigin.x + leftNode.size.width / 2, y: newYPosition)
+        
+        // move nubs
         leftNode.run(moveLeftNubAction)
         rightNode.run(moveRightNubAction)
     }
@@ -155,11 +151,14 @@ class LazerManager {
                 }
             }
             else {
-                if elapsedTime.truncatingRemainder(dividingBy: 0.5) == 0 {
-                    leftNode.texture = SKTexture(imageNamed: "NoHitManiaNub4")
+                if elapsedTime.truncatingRemainder(dividingBy: 1.0) < 0.5 {
+                    leftNode.texture = SKTexture(imageNamed: "NoHitManiaNub1")
+                    rightNode.texture = SKTexture(imageNamed: "NoHitManiaNub1")
                 }
                 else {
-                    leftNode.texture = SKTexture(imageNamed: "NoHitManiaNub1")
+                    leftNode.texture = SKTexture(imageNamed: "NoHitManiaNub4")
+                    rightNode.texture = SKTexture(imageNamed: "NoHitManiaNub4")
+
                 }
             }
         }
