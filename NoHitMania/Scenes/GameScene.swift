@@ -59,7 +59,7 @@ class GameScene: SKScene {
         // Create grid manager and set up grid
         gridManager = GridManager(scene: self, gridSize: GameConstants.defaultGridSize)
         let (cellSize, gridOrigin) = gridManager.setupGrid()
-        
+
         // Create player manager
         playerManager = PlayerManager(
             scene: self,
@@ -70,7 +70,7 @@ class GameScene: SKScene {
         playerManager.onPlayerDeath = { [weak self] in
             self?.handlePlayerDeath()
         }
-        
+
         // Create timer manager
         timerManager = GameTimerManager()
         timerManager.onTimerUpdate = { [weak self] timeString in
@@ -80,16 +80,15 @@ class GameScene: SKScene {
             self?.currentLevelLabel.text = "Level: \(level)"
             self?.updateSpawnRateForLevel(level)
         }
-        
-        // Create audio manager and setup music
-        audioManager = AudioManager(scene: self)
-        audioManager.setupBackgroundMusic()
-        
+
+        // Play music using shared AudioManager
+        AudioManager.shared.changeMusic(to: .game, in: self)
+
         // Create hazard managers
         zapCellManager = ZapCellManager(scene: self)
-        lazerManager = LazerManager(scene: self, gridManager: gridManager, audioManager: audioManager)
-
+        lazerManager = LazerManager(scene: self, gridManager: gridManager, audioManager: AudioManager.shared)
     }
+
     
     private func setupUI() {
         // Timer label
@@ -114,7 +113,9 @@ class GameScene: SKScene {
     private func handlePlayerDeath() {
 //        playerAlive = false
         timerManager.pauseTimer()
-        audioManager.changeMusic(to: .pause)
+        AudioManager.shared.changeMusic(to: .pause, in: self)
+        AudioManager.shared.changeMusic(to: .game, in: self)
+
         
         restartGame()
 
@@ -256,14 +257,20 @@ class GameScene: SKScene {
     // Method to pause the game
     func pauseGame() {
         timerManager.pauseTimer()
-        audioManager.changeMusic(to: .pause)
+        AudioManager.shared.changeMusic(to: .pause, in: self)
+        AudioManager.shared.changeMusic(to: .game, in: self)
+
+
     }
     
     // Method to resume the game
     func resumeGame() {
         if playerAlive {
             timerManager.resumeTimer()
-            audioManager.changeMusic(to: .game)
+            AudioManager.shared.changeMusic(to: .pause, in: self)
+            AudioManager.shared.changeMusic(to: .game, in: self)
+
+
         }
     }
 
@@ -280,7 +287,9 @@ class GameScene: SKScene {
         // Reset managers
         timerManager.startTimer()
         currentLevelLabel.text = "Level: 1"
-        audioManager.changeMusic(to: .game)
+        AudioManager.shared.changeMusic(to: .pause, in: self)
+        AudioManager.shared.changeMusic(to: .game, in: self)
+
         
         // Reset player position
         playerManager.setPlayerPosition(GameConstants.playerDefaultPosition)
