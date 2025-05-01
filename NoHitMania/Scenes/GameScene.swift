@@ -71,9 +71,6 @@ class GameScene: SKScene {
             self?.handlePlayerDeath()
         }
         
-        // Create hazard managers
-        zapCellManager = ZapCellManager(scene: self)
-        lazerManager = LazerManager(scene: self, gridManager: gridManager)
         // Create timer manager
         timerManager = GameTimerManager()
         timerManager.onTimerUpdate = { [weak self] timeString in
@@ -87,6 +84,11 @@ class GameScene: SKScene {
         // Create audio manager and setup music
         audioManager = AudioManager(scene: self)
         audioManager.setupBackgroundMusic()
+        
+        // Create hazard managers
+        zapCellManager = ZapCellManager(scene: self)
+        lazerManager = LazerManager(scene: self, gridManager: gridManager, audioManager: audioManager)
+
     }
     
     private func setupUI() {

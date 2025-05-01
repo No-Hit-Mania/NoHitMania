@@ -15,6 +15,8 @@ class LazerManager {
     private weak var scene: SKScene?
     // Reference to the GridManager
     private weak var gridManager: GridManager?
+    // Reference to the AudioManager
+    private weak var audioManager: AudioManager?
     private var cellSize: CGFloat
     private var gridOrigin: CGPoint
     private var gridSize: Int
@@ -28,14 +30,15 @@ class LazerManager {
     // current beam row
     private var currentBeamRow: Int
     private var isActive: Bool
+    private var lazerFiring: Bool
     private var lastStarted: TimeInterval
 
     // MARK: - Initialization
-    init(scene: SKScene, currentLevel: Int = 1, gridManager: GridManager) {
+    init(scene: SKScene, currentLevel: Int = 1, gridManager: GridManager, audioManager: AudioManager) {
         self.scene = scene
         self.currentLevel = currentLevel
         self.gridManager = gridManager
-
+        self.audioManager = audioManager
         // get grid dimensions
         let grid = gridManager
         cellSize = grid.getCellSize()
@@ -72,12 +75,8 @@ class LazerManager {
       
         beam.position = CGPoint(x: leftXPosition, y: yPosition)
         isActive = false
+        lazerFiring = false
         self.lastStarted = TimeInterval()
-        // load beam first, then lazer for sprites to not be busted, this is debug
-//        self.scene?.addChild(beam)
-//        self.scene?.addChild(rightNode)
-//        self.scene?.addChild(leftNode)
-//        placeNewLazerBeam()
 
     }
     // MARK: - Placement and Updating
@@ -99,6 +98,7 @@ class LazerManager {
         isActive = true
         lastStarted = currentTime
         print("LazerManager: placeNewLazerBeam: \(randomRow), \(currentTime)")
+        audioManager?.playSoundEffect(named: "lazerCharge")
 
     }
     private func moveLazerBeamSet(targetRow: Int) {
@@ -117,13 +117,13 @@ class LazerManager {
         // Create move actions
         let moveLeftNubAction = SKAction.moveTo(y: newYPosition, duration: 0.2) // Adjust duration as needed
         let moveRightNubAction = SKAction.moveTo(y: newYPosition, duration: 0.2)
-        let moveBeamAction = SKAction.moveTo(y: newYPosition, duration: 0.2)
-        
         
         // Despawn lazer while its moving:
         beam.removeFromParent()
         beam.position = CGPoint(x: gridOrigin.x + leftNode.size.width / 2, y: newYPosition)
-        
+        // set everything to false
+        isActive = false
+        lazerFiring = false
         // move nubs
         leftNode.run(moveLeftNubAction)
         rightNode.run(moveRightNubAction)
@@ -136,21 +136,41 @@ class LazerManager {
 
         if (isActive) {
             if elapsedTime >= lazerBeamFullDuration {
-                isActive.toggle()
+                // not being used, this is incase something breaks
+                print("LazerManager: update: timer is up  ")
+                isActive = false
+                lazerFiring = false
                 beam.removeFromParent()
-            } else if (elapsedTime > (8/12) * lazerBeamFullDuration ) {
+            } else if (elapsedTime > (31/60) * lazerBeamFullDuration ) {
                 // killing
-                // needs to be fixed bcuz it will always bring the lazer back even if we move..
                 if beam.intersects(playerManager.playerNode) {
                     return true
                 }
+                // wiggle the beam
+                if isActive && beam.parent != nil {
+                    let wiggleAmplitude: CGFloat = 0.5
+                    let wiggleFrequency: CGFloat = 4.0 // number of wobbles per second
+                    let offsetY = (sin(elapsedTime * .pi * wiggleFrequency) * wiggleAmplitude)
+                    beam.position.y = beam.position.y + offsetY
+                }
+
                 
-            } else if (elapsedTime >= (6/12) * lazerBeamFullDuration) && (elapsedTime <= (8/12) * lazerBeamFullDuration) {
+            } else if (elapsedTime > (30/60) * lazerBeamFullDuration) && (elapsedTime < (31/60) * lazerBeamFullDuration) {
                 if (beam.parent == nil) {
                     scene?.addChild(beam)
+                    if (lazerFiring == false){
+                        lazerFiring.toggle()
+                        audioManager?.playSoundEffect(named: "lazerBlast")
+                        leftNode.texture = SKTexture(imageNamed: "NoHitManiaNub4")
+                        rightNode.texture = SKTexture(imageNamed: "NoHitManiaNub4")
+                    }
+                    
+                } else {
+                    beam.position.y = beam.position.y - 0.1
                 }
             }
             else {
+                // alternate texture
                 if elapsedTime.truncatingRemainder(dividingBy: 1.0) < 0.5 {
                     leftNode.texture = SKTexture(imageNamed: "NoHitManiaNub1")
                     rightNode.texture = SKTexture(imageNamed: "NoHitManiaNub1")
