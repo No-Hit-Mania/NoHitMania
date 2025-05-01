@@ -26,6 +26,7 @@ class BoulderManager {
     // The minimum time a lazerbeam can be should be 3 seconds
     public var rockFullDuration: Double = 6.0
     
+    private var minRollDuration = 2.0
     // current column (0-4)
     private var currentCol: Int
     private var isActive: Bool
@@ -77,16 +78,16 @@ class BoulderManager {
             randomCol = Int.random(in: 0..<gridSize)
             attempts += 1
         }
-        moveBoulder(targetCol: randomCol)
+        moveBoulder(targetCol: randomCol, currentLevel: currentLevel)
 
 
         isActive = true
         lastStarted = currentTime
-        print("BoulderManager: placeNewLazerBeam: \(randomCol), \(currentTime)")
+        print("BoulderManager: startRolling: \(randomCol), \(currentTime)")
         // play boulder sfx
 
     }
-    private func moveBoulder(targetCol: Int) {
+    private func moveBoulder(targetCol: Int, currentLevel: Int) {
         // targetRow = 0-4
         // Ensure the targetRow is within the valid grid bounds
         isActive = false
@@ -94,15 +95,25 @@ class BoulderManager {
             print("Target row is out of bounds.")
             return
         }
-
+        // decide if boulder will come from bottom or top 0 1
+        let rand = Int.random(in: 0...1)
+        
         currentCol = targetCol
         // Calculate the new y position for all elements
-        let topAboveGridYPos = cellSize * CGFloat(gridSize + 1)
-        let newYPosition = gridOrigin.y + topAboveGridYPos + (cellSize / 2)
+        var newYPosition = gridOrigin.y
+        let topAboveGridYPos = cellSize * CGFloat(gridSize)
+        if rand == 1 {
+            newYPosition += topAboveGridYPos + (cellSize * 3 / 4)
+        }
+        else {
+            newYPosition -= (cellSize)
+        }
+       
+        let newXPosition = gridOrigin.x + CGFloat(currentCol) * cellSize
         
         // Despawn rock while moving to new col:
         boulderNode.removeFromParent()
-        boulderNode.position = CGPoint(x: gridOrigin.x + boulderNode.size.width / 2, y: newYPosition)
+        boulderNode.position = CGPoint(x: newXPosition + boulderNode.size.width / 2, y: newYPosition)
         
         // add it back
         if(boulderNode.parent == nil) {
@@ -111,7 +122,42 @@ class BoulderManager {
         // set Boulder to active
         isActive = true
         
-        // TODO: call an action to move it down
+        print("BoulderManager: moveBoulder: target \(targetCol), starting to roll ")
+        
+        // Move boulder to other end
+        var targetY = gridOrigin.y
+        if rand == 1 {
+            targetY -= cellSize
+        }
+        else {
+            targetY += topAboveGridYPos + (cellSize * 3/4)
+        }
+        
+        var waitDuration: TimeInterval
+        var rollingDuration: TimeInterval
+        if currentLevel == 5 {
+            waitDuration = 1.5
+            rollingDuration = 2
+        }
+        else if currentLevel == 4 {
+            waitDuration = 1.75
+            rollingDuration = 3
+        }
+        else {
+            waitDuration = 2.0
+            rollingDuration = 3.5
+        }
+        
+        let waitAction = SKAction.wait(forDuration: waitDuration)
+        let moveBoulderAction = SKAction.moveTo(y: targetY, duration: rollingDuration)
+
+        // Create a sequence that first waits, then moves
+        let sequence = SKAction.sequence([waitAction, moveBoulderAction])
+
+        // Run the sequence on your node
+        boulderNode.run(sequence)
+
+        
         
     }
     
@@ -125,12 +171,12 @@ class BoulderManager {
                 return true
             }
             // wiggle the boulder
-//            if isActive && beam.parent != nil {
-//                let wiggleAmplitude: CGFloat = 0.5
-//                let wiggleFrequency: CGFloat = 4.0 // number of wobbles per second
-//                let offsetY = (sin(elapsedTime * .pi * wiggleFrequency) * wiggleAmplitude)
-//                beam.position.y = beam.position.y + offsetY
-//            }
+            if isActive && boulderNode.parent != nil {
+                let wiggleAmplitude: CGFloat = 0.5
+                let wiggleFrequency: CGFloat = 4.0 // number of wobbles per second
+                let offsetX = (sin(elapsedTime * .pi * wiggleFrequency) * wiggleAmplitude)
+                boulderNode.position.x = boulderNode.position.x + offsetX
+            }
         }
         return isPlayerHit
         
