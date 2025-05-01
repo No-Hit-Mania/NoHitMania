@@ -54,19 +54,14 @@ class ZapCellManager {
         var playerHit = false
         var cellsToRemove: [Int] = []
 
-<<<<<<< HEAD
-        print("Current Time: \(currentTime)")
 
-        for i in 0..<zapCells.count {
-            let zapCell = zapCells[i]
-            print("Zap Cell (\(zapCell.row), \(zapCell.col)) - Activation Time: \(zapCell.nextActivationTime)")
-=======
+        print("Current Time: \(currentTime)")
 //      TODO: imo its a lot cleaner with these prints commented out but u do u
 //        print("ZapCellManager: Current Time: \(currentTime)")
         for i in 0..<zapCells.count {
             let zapCell = zapCells[i]
 //            print("Zap Cell (\(zapCell.row), \(zapCell.col)) - Activation Time: \(zapCell.nextActivationTime)")
->>>>>>> 6441fde9760a300e71725e361703b15f2ae35eb0
+
 
             if currentTime >= zapCell.nextActivationTime {
                 print("Activating zap cell at (\(zapCell.row),\(zapCell.col))")
@@ -80,11 +75,8 @@ class ZapCellManager {
                 let intensity = zapCell.warningIntensity(currentTime: currentTime)
                 if intensity > 0 {
                     flashWarning(row: zapCell.row, col: zapCell.col, intensity: intensity)
-<<<<<<< HEAD
-                     print("Warning flashed for (\(zapCell.row),\(zapCell.col)) - Intensity: \(intensity)")
-=======
+
 //                     print("Warning flashed for (\(zapCell.row),\(zapCell.col)) - Intensity: \(intensity)")
->>>>>>> 6441fde9760a300e71725e361703b15f2ae35eb0
                 }
             }
         }
