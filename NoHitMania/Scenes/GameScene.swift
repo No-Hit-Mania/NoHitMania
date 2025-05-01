@@ -117,7 +117,7 @@ class GameScene: SKScene {
     // MARK: - Game Logic
     
     private func handlePlayerDeath() {
-//        playerAlive = false
+        playerAlive = false
         timerManager.pauseTimer()
         AudioManager.shared.changeMusic(to: .pause, in: self)
         AudioManager.shared.changeMusic(to: .game, in: self)
@@ -212,12 +212,14 @@ class GameScene: SKScene {
                 currentTime: elapsedTime,
                 playerPosition: playerPosition
             )
+    
             if !playerHit {
                 playerHit = lazerManager.update(
                     currentTime: elapsedTime,
                     playerManager: playerManager,
                     currentLevel: timerManager.currentLevel
                 )
+                
             }
             if !playerHit {
                 playerHit = boulderManager.update(currentTime: elapsedTime, playerManager: playerManager, currentLevel: timerManager.currentLevel)
@@ -225,6 +227,7 @@ class GameScene: SKScene {
 
             
             if playerHit {
+                playerAlive = false
                 playerManager.playerDie()
             }
         }

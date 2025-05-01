@@ -167,7 +167,9 @@ class BoulderManager {
 
 
         if (isActive) {
-            if boulderNode.intersects(playerManager.playerNode) {
+            if isActive && boulderNode.parent != nil && boulderNode.intersects(playerManager.playerNode) {
+                print("boulder kill")
+                isActive = false
                 return true
             }
             // wiggle the boulder

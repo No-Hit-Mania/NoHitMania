@@ -64,6 +64,7 @@ class ZapCellManager {
                 print("Activating zap cell at (\(zapCell.row),\(zapCell.col))")
                 let didHitPlayer = activateZapCell(row: zapCell.row, col: zapCell.col, playerPosition: playerPosition)
                 if didHitPlayer {
+                    print("zapCellKilled")
                     playerHit = true
                 }
                 cellsToRemove.append(i)

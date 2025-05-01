@@ -142,6 +142,7 @@ class LazerManager {
             } else if elapsed > (31.0 / 60.0) * lazerBeamFullDuration {
                 // Active beam
                 if beam.intersects(playerManager.playerNode) {
+                    print("lazer kill")
                     return true
                 }
 
