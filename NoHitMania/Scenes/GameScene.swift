@@ -16,6 +16,7 @@ class GameScene: SKScene {
     public var timerManager: GameTimerManager!
     public var audioManager: AudioManager!
     public var lazerManager: LazerManager!
+    public var boulderManager: BoulderManager!
     // UI elements
     private var scoreTimerLabel: SKLabelNode!
     private var currentLevelLabel: SKLabelNode!
@@ -33,10 +34,14 @@ class GameScene: SKScene {
     private var nextZapSpawnTime: TimeInterval = 3.0 // Initial spawn after 3 seconds
     private var zapSpawnInterval: TimeInterval = 5.0 // Base interval between spawns
     
+    
     private var nextLazerSpawnTime: TimeInterval = 5.0  // Spawn at level 2
     private var lazerSpawnInterval: TimeInterval = 6.5 // interval between spawns
     
+    private var nextBoulderSpawnTime: TimeInterval = 5.0 // spawn at level 3
+    private var boulderSpawnInterval: TimeInterval = 6.0
     
+
     // MARK: - Scene Lifecycle
     
     override func didMove(to view: SKView) {
@@ -88,6 +93,7 @@ class GameScene: SKScene {
         // Create hazard managers
         zapCellManager = ZapCellManager(scene: self)
         lazerManager = LazerManager(scene: self, gridManager: gridManager, audioManager: audioManager)
+        boulderManager = BoulderManager(scene: self, gridManager: gridManager, audioManager: audioManager)
 
     }
     
@@ -193,6 +199,11 @@ class GameScene: SKScene {
             lazerManager.placeNewLazerBeam(currentTime: elapsedTime, currentLevel: timerManager.currentLevel )
             nextLazerSpawnTime = elapsedTime + lazerSpawnInterval
         }
+        // Check if its time to spawn a new boulder {
+        if playerAlive && elapsedTime >= nextBoulderSpawnTime {
+            boulderManager.startRollingBoulder(currentTime: elapsedTime, currentLevel: timerManager.currentLevel)
+            nextBoulderSpawnTime = elapsedTime + boulderSpawnInterval
+        }
         // Update zap cells and check if player was hit
         if playerAlive {
             let playerPosition = playerManager.getPlayerPosition()
@@ -206,6 +217,9 @@ class GameScene: SKScene {
                     playerManager: playerManager,
                     currentLevel: timerManager.currentLevel
                 )
+            }
+            if !playerHit {
+                playerHit = boulderManager.update(currentTime: elapsedTime, playerManager: playerManager, currentLevel: timerManager.currentLevel)
             }
 
             
@@ -275,8 +289,9 @@ class GameScene: SKScene {
         
         // Reset spawn timing
         zapSpawnInterval = 5.0 // Reset to base spawn interval
-        nextZapSpawnTime = 0 + 3.0 // Wait 3 seconds before first spawn after restart
-        nextLazerSpawnTime = 0 + 5.0
+        nextZapSpawnTime = 3.0 // Wait 3 seconds before first spawn after restart
+        nextLazerSpawnTime = 5.0 // lvl 2
+        nextBoulderSpawnTime = 10.0 // lvl 3
         // Reset managers
         timerManager.startTimer()
         currentLevelLabel.text = "Level: 1"
@@ -288,6 +303,7 @@ class GameScene: SKScene {
         // Clear existing zap cells
         zapCellManager.clearAllZapCells()
         lazerManager.clearAllLazers()
+        boulderManager.clearAllBoulder()
         
         // Record start time and start timer
         gameStartTime = CACurrentMediaTime()
