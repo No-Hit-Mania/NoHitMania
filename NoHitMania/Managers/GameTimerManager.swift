@@ -51,7 +51,7 @@ class GameTimerManager {
     }
     
     // Resume the timer
-    func resumeTimer() {
+    public func resumeTimer() {
         if !isTimerRunning {
             startTime = Date() // Set a new start time for the current run
             isTimerRunning = true
