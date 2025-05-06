@@ -22,7 +22,7 @@ struct ContentView: View {
 }
 
 func SceneSetup() -> SKScene {
-    let scene = GameScene()
+    let scene = PlayerCustomization()
 //        scene.size = CGSize(width: 300, height: 300)
 //        let scene = GameScene()
     scene.size = UIScreen.main.bounds.size
