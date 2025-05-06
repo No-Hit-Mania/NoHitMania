@@ -34,6 +34,6 @@ class GameButtonNode: SKSpriteNode {
     }
 
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        texture = normalTexture
+        texture = normalBtn  
     }
 }

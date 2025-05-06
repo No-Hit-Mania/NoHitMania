@@ -17,6 +17,8 @@ class OptionsScene: SKNode {
     private var closeButton: SKLabelNode!
     private var quitButton: SKLabelNode!
     
+    var onQuit: (() -> Void)?
+    
     init(size: CGSize) {
         super.init()
         self.isUserInteractionEnabled = true
@@ -78,6 +80,7 @@ class OptionsScene: SKNode {
         closeButton.fontName = "HelveticaNeue-Bold"
         closeButton.position = CGPoint(x: 0, y: -panelSize.height / 2 + 50)
         closeButton.name = "quitButton"
+
         modalPanel.addChild(closeButton)
     }
 
@@ -136,8 +139,10 @@ class OptionsScene: SKNode {
             self.removeFromParent()
         }
         if let label = modalPanel.atPoint(location) as? SKLabelNode, label.name == "quitButton" {
+            self.onQuit?()
+
             
-            self.removeFromParent()
+            print("hello you just disabled the node")
         }
     }
 

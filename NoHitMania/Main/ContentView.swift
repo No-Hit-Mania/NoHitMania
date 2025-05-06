@@ -6,14 +6,37 @@
 import SwiftUI
 import SpriteKit
 
+class SceneCoordinator: ObservableObject {
+    @Published var currentScene: SKScene
+
+    init() {
+        let menu = MainMenuScene()
+        menu.size = UIScreen.main.bounds.size
+        menu.scaleMode = .fill
+        self.currentScene = menu
+    }
+
+    func transitionToGameScene() {
+        let gameScene = GameScene()
+        gameScene.size = UIScreen.main.bounds.size
+        gameScene.scaleMode = .fill
+        self.currentScene = gameScene
+    }
+
+    func loadMainMenu() {
+        let menuScene = MainMenuScene()
+        menuScene.size = UIScreen.main.bounds.size
+        menuScene.scaleMode = .fill
+        self.currentScene = menuScene
+    }
+}
+
 struct ContentView: View {
-    @State var scene: SKScene = SceneSetup()
+    @StateObject private var coordinator = SceneCoordinator()
 
     var body: some View {
-        ZStack {
-            SpriteView(scene: scene)
-                .ignoresSafeArea()
-        }
+        SpriteView(scene: coordinator.currentScene)
+            .ignoresSafeArea()
     }
 }
 
@@ -21,11 +44,3 @@ struct ContentView: View {
     ContentView()
 }
 
-func SceneSetup() -> SKScene {
-    let scene = PlayerCustomization()
-//        scene.size = CGSize(width: 300, height: 300)
-//        let scene = GameScene()
-    scene.size = UIScreen.main.bounds.size
-    scene.scaleMode = .fill
-    return scene
-}

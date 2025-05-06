@@ -9,7 +9,7 @@ import SpriteKit
 
 class PlayerManager {
     // Player node
-    private var playerNode: SKSpriteNode!
+    public var playerNode: SKSpriteNode!
     
     // Player grid position
     private var playerGridPosition = GridPosition(x: 2, y: 2)
@@ -107,6 +107,7 @@ class PlayerManager {
         let scale = SKAction.scale(to: 1.5, duration: 0.3)
         let group = SKAction.group([fadeOut, scale])
         
+
         playerNode.run(group) { [weak self] in
             // Reset player position after death animation
             self?.playerGridPosition = GridPosition(x: 2, y: 2) // Reset to center

@@ -10,18 +10,18 @@ import Combine
 
 class GameTimerManager {
     // Timer state
-    private var scoreTime: TimeInterval = 0.0
+    public var scoreTime: TimeInterval = 0.0
     private var accumulatedTime: TimeInterval = 0.0
     private var startTime: Date? = nil
-    private var isTimerRunning: Bool = false
+    public var isTimerRunning: Bool = false
     
     // Timer publisher
     private var timer = Timer.publish(every: 1.0/60.0, on: .main, in: .common).autoconnect()
     private var gameTimerSubscription: AnyCancellable?
     
     // Level progression
-    private var currentLevel: Int = 1
-    private var secondsBetweenLevels: Int = 5
+    public var currentLevel: Int = 1
+    public var secondsBetweenLevels: Int = 5
     
     // Callback for UI updates
     var onTimerUpdate: ((String) -> Void)?

@@ -10,12 +10,14 @@ import Combine
 
 class GameScene: SKScene {
     // Managers
-    private var gridManager: GridManager!
-    private var playerManager: PlayerManager!
-    private var zapCellManager: ZapCellManager!
+    public var gridManager: GridManager!
+    public var playerManager: PlayerManager!
+    public var zapCellManager: ZapCellManager!
     public var timerManager: GameTimerManager!
-    private var audioManager: AudioManager!
-    
+    public var audioManager: AudioManager!
+    public var lazerManager: LazerManager!
+    public var boulderManager: BoulderManager!
+
     // UI elements
     private var scoreTimerLabel: SKLabelNode!
     private var currentLevelLabel: SKLabelNode!
@@ -29,10 +31,18 @@ class GameScene: SKScene {
     private var gameStartTime: TimeInterval = 0
     private var elapsedTime: TimeInterval = 0
     
-    // Zap cell spawning
+    // Hazard Time Spawns (level 1 - Zap, 2 - Lazer, 3 - Boulder)
     private var nextZapSpawnTime: TimeInterval = 3.0 // Initial spawn after 3 seconds
     private var zapSpawnInterval: TimeInterval = 5.0 // Base interval between spawns
     
+    
+    private var nextLazerSpawnTime: TimeInterval = 5.0  // Spawn at level 2
+    private var lazerSpawnInterval: TimeInterval = 6.5 // interval between spawns
+    
+    private var nextBoulderSpawnTime: TimeInterval = 5.0 // spawn at level 3
+    private var boulderSpawnInterval: TimeInterval = 6.0
+    
+
     // MARK: - Scene Lifecycle
     
     override func didMove(to view: SKView) {
@@ -52,10 +62,12 @@ class GameScene: SKScene {
     // MARK: - Setup Methods
     
     private func setupManagers() {
+        //Adds pause button
+        addPauseButton()
         // Create grid manager and set up grid
         gridManager = GridManager(scene: self, gridSize: GameConstants.defaultGridSize)
         let (cellSize, gridOrigin) = gridManager.setupGrid()
-        
+
         // Create player manager
         playerManager = PlayerManager(
             scene: self,
@@ -66,10 +78,7 @@ class GameScene: SKScene {
         playerManager.onPlayerDeath = { [weak self] in
             self?.handlePlayerDeath()
         }
-        
-        // Create zap cell manager
-        zapCellManager = ZapCellManager(scene: self)
-        
+
         // Create timer manager
         timerManager = GameTimerManager()
         timerManager.onTimerUpdate = { [weak self] timeString in
@@ -79,12 +88,16 @@ class GameScene: SKScene {
             self?.currentLevelLabel.text = "Level: \(level)"
             self?.updateSpawnRateForLevel(level)
         }
-        
-        // Create audio manager and setup music
-        audioManager = AudioManager(scene: self)
-        audioManager.setupBackgroundMusic()
-        addPauseButton()
+
+        // Play music using shared AudioManager
+        AudioManager.shared.changeMusic(to: .game, in: self)
+
+        // Create hazard managers
+        zapCellManager = ZapCellManager(scene: self)
+        lazerManager = LazerManager(scene: self, gridManager: gridManager, audioManager: AudioManager.shared)
+        boulderManager = BoulderManager(scene: self, currentLevel: 1, gridManager: gridManager, audioManager: AudioManager.shared)
     }
+
     
     private func addPauseButton() {
         let texture = SKTexture(imageNamed: "pause_icon")
@@ -117,9 +130,11 @@ class GameScene: SKScene {
     // MARK: - Game Logic
     
     private func handlePlayerDeath() {
-//        playerAlive = false
+        playerAlive = false
         timerManager.pauseTimer()
-        audioManager.changeMusic(to: .pause)
+        AudioManager.shared.changeMusic(to: .pause, in: self)
+        AudioManager.shared.changeMusic(to: .game, in: self)
+
         
         restartGame()
 
@@ -127,14 +142,18 @@ class GameScene: SKScene {
         // For example, showing game over screen
     }
     
-    // Update zap cell spawn rate based on the current level
+    // Update all spawn rate based on the current level
     private func updateSpawnRateForLevel(_ level: Int) {
         // Decrease spawn interval as level increases (faster spawning)
         // But ensure it doesn't go below a minimum threshold
-        let minSpawnInterval: TimeInterval = 1.0 // Fastest spawn rate (1 per second)
+        let minSpawnInterval: TimeInterval = 2.0 // Fastest spawn rate (1 per second)
         let decreaseFactor: TimeInterval = 0.5 // How much to decrease per level
         
+      
+        let minLazerSpawn: TimeInterval = 3.5
+        
         zapSpawnInterval = max(zapSpawnInterval - decreaseFactor, minSpawnInterval)
+        lazerSpawnInterval = max(lazerSpawnInterval - decreaseFactor, minLazerSpawn)
         
         // Also decrease warning time as levels increase
         let chargeTimeReduction = min(0.1 * Double(level - 1), 0.8) // Reduce charge time by up to 80%
@@ -172,6 +191,7 @@ class GameScene: SKScene {
     // MARK: - Update Loop
     
     override func update(_ currentTime: TimeInterval) {
+
         if lastUpdateTime == 0 {
             lastUpdateTime = currentTime
             gameStartTime = currentTime
@@ -188,16 +208,39 @@ class GameScene: SKScene {
             spawnRandomZapCell()
             nextZapSpawnTime = elapsedTime + zapSpawnInterval
         }
-        
+        // Check if its time for a new lazer beam
+        if playerAlive && elapsedTime >= nextLazerSpawnTime {
+            lazerManager.placeNewLazerBeam(currentTime: elapsedTime, currentLevel: timerManager.currentLevel )
+            nextLazerSpawnTime = elapsedTime + lazerSpawnInterval
+        }
+        // Check if its time to spawn a new boulder {
+        if playerAlive && elapsedTime >= nextBoulderSpawnTime {
+            boulderManager.startRollingBoulder(currentTime: elapsedTime, currentLevel: timerManager.currentLevel)
+            nextBoulderSpawnTime = elapsedTime + boulderSpawnInterval
+        }
         // Update zap cells and check if player was hit
         if playerAlive {
             let playerPosition = playerManager.getPlayerPosition()
-            let playerHit = zapCellManager.update(
+            var playerHit = zapCellManager.update(
                 currentTime: elapsedTime,
                 playerPosition: playerPosition
             )
+    
+            if !playerHit {
+                playerHit = lazerManager.update(
+                    currentTime: elapsedTime,
+                    playerManager: playerManager,
+                    currentLevel: timerManager.currentLevel
+                )
+                
+            }
+            if !playerHit {
+                playerHit = boulderManager.update(currentTime: elapsedTime, playerManager: playerManager, currentLevel: timerManager.currentLevel)
+            }
+
             
             if playerHit {
+                playerAlive = false
                 playerManager.playerDie()
             }
         }
@@ -218,6 +261,14 @@ class GameScene: SKScene {
         if node.name == "pauseButton" {
             timerManager.pauseTimer()
             let modal = OptionsScene(size: self.size)
+            modal.zPosition = 10
+            modal.onQuit = { [weak self] in
+                if let view = self?.view {
+                    let gameScene = MainMenuScene(size: view.bounds.size)
+                    let transition = SKTransition.fade(withDuration: 0.5) // You can change the transition type and duration here
+                    view.presentScene(gameScene, transition: transition)
+                }
+            }
             modal.name = "optionsModal"
             addChild(modal)
 
@@ -254,14 +305,20 @@ class GameScene: SKScene {
     // Method to pause the game
     func pauseGame() {
         timerManager.pauseTimer()
-        audioManager.changeMusic(to: .pause)
+        AudioManager.shared.changeMusic(to: .pause, in: self)
+        AudioManager.shared.changeMusic(to: .game, in: self)
+
+
     }
     
     // Method to resume the game
     func resumeGame() {
         if playerAlive {
             timerManager.resumeTimer()
-            audioManager.changeMusic(to: .game)
+            AudioManager.shared.changeMusic(to: .pause, in: self)
+            AudioManager.shared.changeMusic(to: .game, in: self)
+
+
         }
     }
 
@@ -273,18 +330,23 @@ class GameScene: SKScene {
         
         // Reset spawn timing
         zapSpawnInterval = 5.0 // Reset to base spawn interval
-        nextZapSpawnTime = 0 + 3.0 // Wait 3 seconds before first spawn after restart
-        
+        nextZapSpawnTime = 3.0 // Wait 3 seconds before first spawn after restart
+        nextLazerSpawnTime = 5.0 // lvl 2
+        nextBoulderSpawnTime = 10.0 // lvl 3
         // Reset managers
         timerManager.startTimer()
         currentLevelLabel.text = "Level: 1"
-        audioManager.changeMusic(to: .game)
+        AudioManager.shared.changeMusic(to: .pause, in: self)
+        AudioManager.shared.changeMusic(to: .game, in: self)
+
         
         // Reset player position
         playerManager.setPlayerPosition(GameConstants.playerDefaultPosition)
         
         // Clear existing zap cells
         zapCellManager.clearAllZapCells()
+        lazerManager.clearAllLazers()
+        boulderManager.clearAllBoulder()
         
         // Record start time and start timer
         gameStartTime = CACurrentMediaTime()
