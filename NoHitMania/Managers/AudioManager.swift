@@ -13,6 +13,7 @@ class AudioManager {
     enum MusicType: String {
         case mainMenu = "MenuTheme.mp3"
         case game = "GameMusic.wav"
+        case gameFromPause = "GameMusicFromPause.mp3"
         case pause = "PauseMusic.mp3"
         case none = ""
     }

@@ -322,7 +322,7 @@ class GameScene: SKScene {
             boulderManager.clearAllBoulder()
             timerManager.resumeTimer()
             AudioManager.shared.changeMusic(to: .pause, in: self)
-            AudioManager.shared.changeMusic(to: .game, in: self)
+            AudioManager.shared.changeMusic(to: .gameFromPause, in: self)
             canPressPause = true
 
         }
