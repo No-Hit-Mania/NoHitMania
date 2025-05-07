@@ -17,9 +17,12 @@ class OptionsScene: SKNode {
     private var closeButton: SKLabelNode!
     private var quitButton: SKLabelNode!
     
+    private var isMainMenu: Bool
+    
     var onQuit: (() -> Void)?
     
-    init(size: CGSize) {
+    init(size: CGSize, isMainMenu: Bool = false) {
+        self.isMainMenu = isMainMenu
         super.init()
         self.isUserInteractionEnabled = true
         setupModal(size: size)
@@ -81,7 +84,9 @@ class OptionsScene: SKNode {
         closeButton.position = CGPoint(x: 0, y: -panelSize.height / 2 + 50)
         closeButton.name = "quitButton"
 
-        modalPanel.addChild(closeButton)
+        if isMainMenu == false {
+            modalPanel.addChild(closeButton)
+        }
     }
 
     func addSliderTitle(_ text: String, valueLabel: inout SKLabelNode!, y: CGFloat) {

@@ -72,6 +72,18 @@ class MainMenuScene: SKScene {
                     print("Shop button tapped")
                 case 2:
                     print("Settings button tapped")
+                    let modal = OptionsScene(size: self.size, isMainMenu: true)
+                    modal.zPosition = 10
+                    modal.onQuit = { [weak self] in
+                        if let view = self?.view {
+                            let gameScene = MainMenuScene(size: view.bounds.size)
+                            let transition = SKTransition.fade(withDuration: 0.5) // You can change the transition type and duration here
+                            view.presentScene(gameScene, transition: transition)
+                        }
+                    }
+                    modal.name = "optionsModal"
+                    self.addChild(modal)
+
                 default:
                     break
                 }
