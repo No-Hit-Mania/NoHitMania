@@ -138,10 +138,13 @@ class GameScene: SKScene {
         AudioManager.shared.changeMusic(to: .game, in: self)
 
         
-        restartGame()
-
-        // Add any additional death handling here
-        // For example, showing game over screen
+//        restartGame()
+            
+        if let view = self.view {
+            let gameScene = GameOverScene(size: view.bounds.size, scoreTime: timerManager.scoreTime, playerManager: playerManager)
+            let transition = SKTransition.fade(withDuration: 0.5)
+            view.presentScene(gameScene, transition: transition)
+        }
     }
     
     // Update all spawn rate based on the current level
