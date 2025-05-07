@@ -134,14 +134,11 @@ class OptionsScene: SKNode {
         }
 
         if let label = modalPanel.atPoint(location) as? SKLabelNode, label.name == "closeButton" {
-            (self.scene as? GameScene)?.timerManager.resumeTimer()
+            (self.scene as? GameScene)?.resumeGame()
             self.removeFromParent()
         }
         if let label = modalPanel.atPoint(location) as? SKLabelNode, label.name == "quitButton" {
             self.onQuit?()
-
-            
-            print("hello you just disabled the node")
         }
     }
 

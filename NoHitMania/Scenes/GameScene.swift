@@ -259,7 +259,7 @@ class GameScene: SKScene {
         let node = self.atPoint(location)
 
         if node.name == "pauseButton" {
-            timerManager.pauseTimer()
+            pauseGame()
             let modal = OptionsScene(size: self.size)
             modal.zPosition = 10
             modal.onQuit = { [weak self] in
@@ -306,7 +306,7 @@ class GameScene: SKScene {
     func pauseGame() {
         timerManager.pauseTimer()
         AudioManager.shared.changeMusic(to: .pause, in: self)
-        AudioManager.shared.changeMusic(to: .game, in: self)
+//        AudioManager.shared.changeMusic(to: .game, in: self)
 
 
     }
@@ -315,7 +315,7 @@ class GameScene: SKScene {
     func resumeGame() {
         if playerAlive {
             timerManager.resumeTimer()
-            AudioManager.shared.changeMusic(to: .pause, in: self)
+//            AudioManager.shared.changeMusic(to: .pause, in: self)
             AudioManager.shared.changeMusic(to: .game, in: self)
 
 

@@ -34,6 +34,10 @@ class PlayerCustomization: SKScene {
         let titles = ["Head", "Body", "Death Effects"]
         let imageGroups = [headImages, bodyImages, deathImages]
         addBackButton()
+        //Adding background music
+        AudioManager.shared.changeMusic(to: .pause, in: self)
+        
+        //creating 3x3 grids for player custimization assets
         for index in 0..<3 {
             let originX = (leftWidth - gridWidth) / 2
             let originY = startY - CGFloat(index) * (gridSectionHeight + spacing)
