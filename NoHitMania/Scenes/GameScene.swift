@@ -17,12 +17,14 @@ class GameScene: SKScene {
     public var audioManager: AudioManager!
     public var lazerManager: LazerManager!
     public var boulderManager: BoulderManager!
+
     // UI elements
     private var scoreTimerLabel: SKLabelNode!
     private var currentLevelLabel: SKLabelNode!
     
     // Touch handling
     private var startTouchPosition: CGPoint?
+    private var canPressPause: Bool = false
     
     // Game state
     private var playerAlive: Bool = true
@@ -45,7 +47,7 @@ class GameScene: SKScene {
     // MARK: - Scene Lifecycle
     
     override func didMove(to view: SKView) {
-        backgroundColor = .black
+        backgroundColor = .white
         
         // Initialize managers
         setupManagers()
@@ -61,6 +63,8 @@ class GameScene: SKScene {
     // MARK: - Setup Methods
     
     private func setupManagers() {
+        //Adds pause button
+        addPauseButton()
         // Create grid manager and set up grid
         gridManager = GridManager(scene: self, gridSize: GameConstants.defaultGridSize)
         let (cellSize, gridOrigin) = gridManager.setupGrid()
@@ -96,10 +100,21 @@ class GameScene: SKScene {
     }
 
     
+    private func addPauseButton() {
+        canPressPause = true
+        let texture = SKTexture(imageNamed: "pause_icon")
+        let pauseNode = SKSpriteNode(texture: texture)
+        pauseNode.name = "pauseButton"
+        pauseNode.size = CGSize(width: 50, height: 50)
+        pauseNode.position = CGPoint(x: size.width / 10, y: size.height - 60)
+        pauseNode.zPosition = 100
+        addChild(pauseNode)
+    }
+
     private func setupUI() {
         // Timer label
         scoreTimerLabel = SKLabelNode(text: "00:00.00")
-        scoreTimerLabel.fontColor = .white
+        scoreTimerLabel.fontColor = .black
         scoreTimerLabel.fontSize = 30
         scoreTimerLabel.position = CGPoint(x: size.width / 2, y: size.height - 100)
         scoreTimerLabel.fontName = "Helvetica-Bold"
@@ -107,7 +122,7 @@ class GameScene: SKScene {
         
         // Level label
         currentLevelLabel = SKLabelNode(text: "Level: 1")
-        currentLevelLabel.fontColor = .white
+        currentLevelLabel.fontColor = .black
         currentLevelLabel.fontName = "Helvetica-Bold"
         currentLevelLabel.fontSize = 25
         currentLevelLabel.position = CGPoint(x: size.width / 2, y: size.height - 135)
@@ -123,10 +138,13 @@ class GameScene: SKScene {
         AudioManager.shared.changeMusic(to: .game, in: self)
 
         
-        restartGame()
-
-        // Add any additional death handling here
-        // For example, showing game over screen
+//        restartGame()
+            
+        if let view = self.view {
+            let gameScene = GameOverScene(size: view.bounds.size, scoreTime: timerManager.scoreTime, playerManager: playerManager)
+            let transition = SKTransition.fade(withDuration: 0.5)
+            view.presentScene(gameScene, transition: transition)
+        }
     }
     
     // Update all spawn rate based on the current level
@@ -190,47 +208,50 @@ class GameScene: SKScene {
         
         elapsedTime = currentTime - gameStartTime
         
-        // Check if it's time to spawn a new zap cell
-        if playerAlive && elapsedTime >= nextZapSpawnTime {
-            spawnRandomZapCell()
-            nextZapSpawnTime = elapsedTime + zapSpawnInterval
-        }
-        // Check if its time for a new lazer beam
-        if playerAlive && elapsedTime >= nextLazerSpawnTime {
-            lazerManager.placeNewLazerBeam(currentTime: elapsedTime, currentLevel: timerManager.currentLevel )
-            nextLazerSpawnTime = elapsedTime + lazerSpawnInterval
-        }
-        // Check if its time to spawn a new boulder {
-        if playerAlive && elapsedTime >= nextBoulderSpawnTime {
-            boulderManager.startRollingBoulder(currentTime: elapsedTime, currentLevel: timerManager.currentLevel)
-            nextBoulderSpawnTime = elapsedTime + boulderSpawnInterval
-        }
-        // Update zap cells and check if player was hit
-        if playerAlive {
-            let playerPosition = playerManager.getPlayerPosition()
-            var playerHit = zapCellManager.update(
-                currentTime: elapsedTime,
-                playerPosition: playerPosition
-            )
-    
-            if !playerHit {
-                playerHit = lazerManager.update(
+        // check if the game is active
+        if timerManager.isTimerRunning {
+            // Check if it's time to spawn a new zap cell
+            if playerAlive && elapsedTime >= nextZapSpawnTime {
+                spawnRandomZapCell()
+                nextZapSpawnTime = elapsedTime + zapSpawnInterval
+            }
+            // Check if its time for a new lazer beam
+            if playerAlive && elapsedTime >= nextLazerSpawnTime {
+                lazerManager.placeNewLazerBeam(currentTime: elapsedTime, currentLevel: timerManager.currentLevel )
+                nextLazerSpawnTime = elapsedTime + lazerSpawnInterval
+            }
+            // Check if its time to spawn a new boulder {
+            if playerAlive && elapsedTime >= nextBoulderSpawnTime {
+                boulderManager.startRollingBoulder(currentTime: elapsedTime, currentLevel: timerManager.currentLevel)
+                nextBoulderSpawnTime = elapsedTime + boulderSpawnInterval
+            }
+            // Update zap cells and check if player was hit
+            if playerAlive {
+                let playerPosition = playerManager.getPlayerPosition()
+                var playerHit = zapCellManager.update(
                     currentTime: elapsedTime,
-                    playerManager: playerManager,
-                    currentLevel: timerManager.currentLevel
+                    playerPosition: playerPosition
                 )
-                
-            }
-            if !playerHit {
-                playerHit = boulderManager.update(currentTime: elapsedTime, playerManager: playerManager, currentLevel: timerManager.currentLevel)
-            }
+        
+                if !playerHit {
+                    playerHit = lazerManager.update(
+                        currentTime: elapsedTime,
+                        playerManager: playerManager,
+                        currentLevel: timerManager.currentLevel
+                    )
+                    
+                }
+                if !playerHit {
+                    playerHit = boulderManager.update(currentTime: elapsedTime, playerManager: playerManager, currentLevel: timerManager.currentLevel)
+                }
 
-            
-            if playerHit {
-                playerAlive = false
-                playerManager.playerDie()
+                if playerHit {
+                    playerAlive = false
+                    playerManager.playerDie()
+                }
             }
         }
+        
     }
     
     // MARK: - Touch Handling
@@ -242,6 +263,24 @@ class GameScene: SKScene {
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first, let start = startTouchPosition, playerAlive else { return }
+        let location = touch.location(in: self)
+        let node = self.atPoint(location)
+
+        if node.name == "pauseButton" && canPressPause {
+            pauseGame()
+            let modal = OptionsScene(size: self.size)
+            modal.zPosition = 10
+            modal.onQuit = { [weak self] in
+                if let view = self?.view {
+                    let gameScene = MainMenuScene(size: view.bounds.size)
+                    let transition = SKTransition.fade(withDuration: 0.5) // You can change the transition type and duration here
+                    view.presentScene(gameScene, transition: transition)
+                }
+            }
+            modal.name = "optionsModal"
+            addChild(modal)
+
+        }
         let end = touch.location(in: self)
         
         // Calculate horizontal and vertical differences
@@ -275,18 +314,19 @@ class GameScene: SKScene {
     func pauseGame() {
         timerManager.pauseTimer()
         AudioManager.shared.changeMusic(to: .pause, in: self)
-        AudioManager.shared.changeMusic(to: .game, in: self)
-
-
+        canPressPause = false
     }
     
     // Method to resume the game
     func resumeGame() {
+        print("game resumed")
         if playerAlive {
+            // reset the boulder since its movement is not based on the update loop
+            boulderManager.clearAllBoulder()
             timerManager.resumeTimer()
             AudioManager.shared.changeMusic(to: .pause, in: self)
-            AudioManager.shared.changeMusic(to: .game, in: self)
-
+            AudioManager.shared.changeMusic(to: .gameFromPause, in: self)
+            canPressPause = true
 
         }
     }

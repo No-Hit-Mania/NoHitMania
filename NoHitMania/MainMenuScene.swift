@@ -1,3 +1,19 @@
+//
+//  MainMenuScene.swift
+//  NoHitMania
+//
+//  Created by Cristobal Elizarraraz on 4/29/25.
+//
+
+
+//
+//  MainMenuScene.swift
+//  NoHitMania
+//
+//  Created by Jason Kim on 4/20/25.
+//
+
+
 import SpriteKit
 
 class MainMenuScene: SKScene {
@@ -56,6 +72,18 @@ class MainMenuScene: SKScene {
                     print("Shop button tapped")
                 case 2:
                     print("Settings button tapped")
+                    let modal = OptionsScene(size: self.size, isMainMenu: true)
+                    modal.zPosition = 10
+                    modal.onQuit = { [weak self] in
+                        if let view = self?.view {
+                            let gameScene = MainMenuScene(size: view.bounds.size)
+                            let transition = SKTransition.fade(withDuration: 0.5) // You can change the transition type and duration here
+                            view.presentScene(gameScene, transition: transition)
+                        }
+                    }
+                    modal.name = "optionsModal"
+                    self.addChild(modal)
+
                 default:
                     break
                 }
@@ -104,6 +132,16 @@ class MainMenuScene: SKScene {
             view.presentScene(gameScene, transition: transition)
         }
     }
+    
+    private func transitionToPC() {
+        if let view = self.view {
+            let gameScene = PlayerCustomization(size: view.bounds.size)
+            let transition = SKTransition.fade(withDuration: 0.5) // You can change the transition type and duration here
+            view.presentScene(gameScene, transition: transition)
+        }
+        
+        
+    }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
@@ -113,8 +151,13 @@ class MainMenuScene: SKScene {
         for node in nodesAtPoint {
             if node.name == "Stickman" {
                 print("Stickman tapped")
+                self.transitionToPC()
                 // Add animation or reaction
             }
         }
     }
+    
+
+    
 }
+

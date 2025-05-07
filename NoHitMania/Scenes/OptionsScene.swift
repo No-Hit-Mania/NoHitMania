@@ -15,8 +15,14 @@ class OptionsScene: SKNode {
     private var slider2ValueLabel: SKLabelNode!
     private var modalPanel: SKShapeNode!
     private var closeButton: SKLabelNode!
+    private var quitButton: SKLabelNode!
     
-    init(size: CGSize) {
+    private var isMainMenu: Bool
+    
+    var onQuit: (() -> Void)?
+    
+    init(size: CGSize, isMainMenu: Bool = false) {
+        self.isMainMenu = isMainMenu
         super.init()
         self.isUserInteractionEnabled = true
         setupModal(size: size)
@@ -63,11 +69,24 @@ class OptionsScene: SKNode {
         // Close Button
         closeButton = SKLabelNode(text: "Close")
         closeButton.fontSize = 30
+        closeButton.fontColor = .orange
+        closeButton.fontName = "HelveticaNeue-Bold"
+        closeButton.position = CGPoint(x: 0, y: -panelSize.height / 2 + 75)
+        closeButton.name = "closeButton"
+        modalPanel.addChild(closeButton)
+        
+        //Quit Button
+        // Close Button
+        closeButton = SKLabelNode(text: "Quit")
+        closeButton.fontSize = 30
         closeButton.fontColor = .red
         closeButton.fontName = "HelveticaNeue-Bold"
         closeButton.position = CGPoint(x: 0, y: -panelSize.height / 2 + 50)
-        closeButton.name = "closeButton"
-        modalPanel.addChild(closeButton)
+        closeButton.name = "quitButton"
+
+        if isMainMenu == false {
+            modalPanel.addChild(closeButton)
+        }
     }
 
     func addSliderTitle(_ text: String, valueLabel: inout SKLabelNode!, y: CGFloat) {
@@ -121,8 +140,14 @@ class OptionsScene: SKNode {
         }
 
         if let label = modalPanel.atPoint(location) as? SKLabelNode, label.name == "closeButton" {
-            (self.scene as? GameScene)?.timerManager.resumeTimer()
+            (self.scene as? GameScene)?.resumeGame()
             self.removeFromParent()
+        }
+        if let label = modalPanel.atPoint(location) as? SKLabelNode, label.name == "quitButton" {
+            self.onQuit?()
+
+            
+            print("hello you just disabled the node")
         }
     }
 
