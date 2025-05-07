@@ -69,13 +69,14 @@ class OptionsScene: SKNode {
         closeButton.name = "closeButton"
         modalPanel.addChild(closeButton)
         
+        //Quit Button
         quitButton = SKLabelNode(text: "Quit")
         quitButton.fontSize = 30
         quitButton.fontColor = .red
         quitButton.fontName = "HelveticaNeue-Bold"
-        quitButton.position = CGPoint(x: 0, y: -panelSize.height / 2 + 40)
+        quitButton.position = CGPoint(x: 0, y: -panelSize.height / 2 + 50)
         quitButton.name = "quitButton"
-
+        
         if isMainMenu == false {
             modalPanel.addChild(quitButton)
         }
@@ -135,13 +136,12 @@ class OptionsScene: SKNode {
             }
         }
 
-        if let label = modalPanel.atPoint(location) as? SKLabelNode {
-            if label.name == "closeButton" {
-                (self.scene as? GameScene)?.resumeGame()
-                self.removeFromParent()
-            } else if label.name == "quitButton" {
-                self.onQuit?()
-            }
+        if let label = modalPanel.atPoint(location) as? SKLabelNode, label.name == "closeButton" {
+            (self.scene as? GameScene)?.resumeGame()
+            self.removeFromParent()
+        }
+        if let label = modalPanel.atPoint(location) as? SKLabelNode, label.name == "quitButton" {
+            self.onQuit?()
         }
     }
 

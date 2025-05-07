@@ -29,11 +29,15 @@ class PlayerCustomization: SKScene {
         let gridSectionHeight = titleHeight + gridHeight
         let totalGridsHeight = 3 * gridSectionHeight + 2 * spacing
 
-        var startY = (size.height + totalGridsHeight) / 2 - buttonSize.height / 2
+        let startY = (size.height + totalGridsHeight) / 2 - buttonSize.height / 2
 
         let titles = ["Head", "Body", "Death Effects"]
         let imageGroups = [headImages, bodyImages, deathImages]
-
+        addBackButton()
+        //Adding background music
+        AudioManager.shared.changeMusic(to: .pause, in: self)
+        
+        //creating 3x3 grids for player custimization assets
         for index in 0..<3 {
             let originX = (leftWidth - gridWidth) / 2
             let originY = startY - CGFloat(index) * (gridSectionHeight + spacing)
@@ -48,15 +52,25 @@ class PlayerCustomization: SKScene {
             )
         }
 
-        // Right side sprite
+        // player sprite
         let rightSprite = SKSpriteNode(imageNamed: "preview_image") // Replace with your image
         rightSprite.size = CGSize(width: 200, height: 200)
         rightSprite.position = CGPoint(x: midX + rightWidth / 2, y: size.height / 2)
         rightSprite.name = "preview"
         addChild(rightSprite)
     }
-
-    func addTitle(_ text: String, at position: CGPoint) {
+    
+    private func addBackButton() {
+        let texture = SKTexture(imageNamed: "back_icon")
+        let pauseNode = SKSpriteNode(texture: texture)
+        pauseNode.name = "backButton"
+        pauseNode.size = CGSize(width: 50, height: 50)
+        pauseNode.position = CGPoint(x: size.width / 10, y: size.height - 60)
+        pauseNode.zPosition = 100
+        addChild(pauseNode)
+    }
+    
+    private func addTitle(_ text: String, at position: CGPoint) {
         let titleLabel = SKLabelNode(text: text)
         titleLabel.fontName = "Helvetica-Bold"
         titleLabel.fontSize = 28
@@ -65,7 +79,7 @@ class PlayerCustomization: SKScene {
         addChild(titleLabel)
     }
 
-    func create3x3Grid(at origin: CGPoint, buttonSize: CGSize, spacing: CGFloat, imageNames: [String], groupTag: Int) {
+    private func create3x3Grid(at origin: CGPoint, buttonSize: CGSize, spacing: CGFloat, imageNames: [String], groupTag: Int) {
         for row in 0..<3 {
             for col in 0..<3 {
                 let index = row * 3 + col
@@ -88,10 +102,13 @@ class PlayerCustomization: SKScene {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
         let node = atPoint(location)
-
         if let name = node.name, name.starts(with: "button_") {
             print("Tapped \(name)")
             // You could update the right sprite image here based on the button tapped
+        }else if node.name == "backButton" {
+            let newScene = MainMenuScene(size: self.size)
+            newScene.scaleMode = .aspectFill
+            self.view?.presentScene(newScene, transition: .fade(withDuration: 0.5))
         }
     }
 }

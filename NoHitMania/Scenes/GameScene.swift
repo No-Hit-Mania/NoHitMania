@@ -324,7 +324,7 @@ class GameScene: SKScene {
             // reset the boulder since its movement is not based on the update loop
             boulderManager.clearAllBoulder()
             timerManager.resumeTimer()
-            AudioManager.shared.changeMusic(to: .pause, in: self)
+//            AudioManager.shared.changeMusic(to: .pause, in: self)
             AudioManager.shared.changeMusic(to: .gameFromPause, in: self)
             canPressPause = true
 
