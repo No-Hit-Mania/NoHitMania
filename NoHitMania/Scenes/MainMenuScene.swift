@@ -2,14 +2,6 @@
 //  MainMenuScene.swift
 //  NoHitMania
 //
-//  Created by Cristobal Elizarraraz on 4/29/25.
-//
-
-
-//
-//  MainMenuScene.swift
-//  NoHitMania
-//
 //  Created by Jason Kim on 4/20/25.
 //
 

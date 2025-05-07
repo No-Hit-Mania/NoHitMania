@@ -32,16 +32,13 @@ class OptionsScene: SKNode {
         fatalError("init(coder:) has not been implemented")
     }
 
-
     func setupModal(size: CGSize) {
-        // Dimmed background
         let dim = SKShapeNode(rectOf: CGSize(width: size.width, height: size.height))
         dim.fillColor = SKColor.black.withAlphaComponent(0.5)
         dim.position = CGPoint(x: size.width / 2, y: size.height / 2)
         dim.zPosition = 0
         addChild(dim)
         
-        // Modal panel
         let panelSize = CGSize(width: size.width * 0.8, height: size.height * 0.7)
         modalPanel = SKShapeNode(rectOf: panelSize, cornerRadius: 20)
         modalPanel.fillColor = .white
@@ -51,7 +48,6 @@ class OptionsScene: SKNode {
         modalPanel.zPosition = 1
         addChild(modalPanel)
         
-        // Title
         let title = SKLabelNode(text: "Settings")
         title.fontSize = 50
         title.fontColor = .black
@@ -59,14 +55,12 @@ class OptionsScene: SKNode {
         title.position = CGPoint(x: 0, y: panelSize.height / 2 - 80)
         modalPanel.addChild(title)
         
-        // Sliders
         addSliderTitle("Music", valueLabel: &slider1ValueLabel, y: 80)
-        createSlider(y: 40, name: "slider1")
+        createSlider(y: 40, name: "slider1", value: AudioManager.shared.getMusicVolume())
         
         addSliderTitle("Sound Effects", valueLabel: &slider2ValueLabel, y: -80)
-        createSlider(y: -120, name: "slider2")
+        createSlider(y: -120, name: "slider2", value: AudioManager.shared.getEffectsVolume())
         
-        // Close Button
         closeButton = SKLabelNode(text: "Close")
         closeButton.fontSize = 30
         closeButton.fontColor = .orange
@@ -75,17 +69,15 @@ class OptionsScene: SKNode {
         closeButton.name = "closeButton"
         modalPanel.addChild(closeButton)
         
-        //Quit Button
-        // Close Button
-        closeButton = SKLabelNode(text: "Quit")
-        closeButton.fontSize = 30
-        closeButton.fontColor = .red
-        closeButton.fontName = "HelveticaNeue-Bold"
-        closeButton.position = CGPoint(x: 0, y: -panelSize.height / 2 + 50)
-        closeButton.name = "quitButton"
+        quitButton = SKLabelNode(text: "Quit")
+        quitButton.fontSize = 30
+        quitButton.fontColor = .red
+        quitButton.fontName = "HelveticaNeue-Bold"
+        quitButton.position = CGPoint(x: 0, y: -panelSize.height / 2 + 40)
+        quitButton.name = "quitButton"
 
         if isMainMenu == false {
-            modalPanel.addChild(closeButton)
+            modalPanel.addChild(quitButton)
         }
     }
 
@@ -107,7 +99,7 @@ class OptionsScene: SKNode {
         modalPanel.addChild(valueLabel)
     }
 
-    func createSlider(y: CGFloat, name: String) {
+    func createSlider(y: CGFloat, name: String, value: Float) {
         let track = SKShapeNode(rectOf: CGSize(width: 300, height: 10), cornerRadius: 5)
         track.fillColor = .blue
         track.position = CGPoint(x: 0, y: y)
@@ -116,14 +108,18 @@ class OptionsScene: SKNode {
 
         let handle = SKShapeNode(circleOfRadius: 12)
         handle.fillColor = .black
-        handle.position = CGPoint(x: 0, y: y)
+        let x = CGFloat(value) * 300 - 150
+        handle.position = CGPoint(x: x, y: y)
         handle.name = name
         modalPanel.addChild(handle)
 
+        let percentage = Int(value * 100)
         if name == "slider1" {
             slider1Handle = handle
+            slider1ValueLabel.text = "\(percentage)"
         } else {
             slider2Handle = handle
+            slider2ValueLabel.text = "\(percentage)"
         }
     }
 
@@ -139,15 +135,13 @@ class OptionsScene: SKNode {
             }
         }
 
-        if let label = modalPanel.atPoint(location) as? SKLabelNode, label.name == "closeButton" {
-            (self.scene as? GameScene)?.resumeGame()
-            self.removeFromParent()
-        }
-        if let label = modalPanel.atPoint(location) as? SKLabelNode, label.name == "quitButton" {
-            self.onQuit?()
-
-            
-            print("hello you just disabled the node")
+        if let label = modalPanel.atPoint(location) as? SKLabelNode {
+            if label.name == "closeButton" {
+                (self.scene as? GameScene)?.resumeGame()
+                self.removeFromParent()
+            } else if label.name == "quitButton" {
+                self.onQuit?()
+            }
         }
     }
 
@@ -161,10 +155,14 @@ class OptionsScene: SKNode {
         handle.position.x = clampedX
 
         let percentage = Int(((clampedX - minX) / (maxX - minX)) * 100)
+        let volumeValue = Float(percentage) / 100.0
+
         if handle == slider1Handle {
             slider1ValueLabel.text = "\(percentage)"
+            AudioManager.shared.setMusicVolume(volumeValue)
         } else if handle == slider2Handle {
             slider2ValueLabel.text = "\(percentage)"
+            AudioManager.shared.setEffectsVolume(volumeValue)
         }
     }
 
@@ -176,4 +174,3 @@ class OptionsScene: SKNode {
         activeSlider = nil
     }
 }
-
