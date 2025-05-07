@@ -72,6 +72,7 @@ class MainMenuScene: SKScene {
                     print("Shop button tapped")
                 case 2:
                     print("Settings button tapped")
+                    self.openOptionsModal()
                 default:
                     break
                 }
@@ -79,6 +80,12 @@ class MainMenuScene: SKScene {
 
             addChild(button)
         }
+    }
+    private func openOptionsModal(){
+        let modal = OptionsScene(size: self.size)
+        modal.zPosition = 10
+        modal.name = "optionsModal"
+        addChild(modal)
     }
 
     private func setupStickman() {

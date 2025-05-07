@@ -73,15 +73,14 @@ class OptionsScene: SKNode {
         modalPanel.addChild(closeButton)
         
         //Quit Button
-        // Close Button
-        closeButton = SKLabelNode(text: "Quit")
-        closeButton.fontSize = 30
-        closeButton.fontColor = .red
-        closeButton.fontName = "HelveticaNeue-Bold"
-        closeButton.position = CGPoint(x: 0, y: -panelSize.height / 2 + 50)
-        closeButton.name = "quitButton"
-
-        modalPanel.addChild(closeButton)
+        quitButton = SKLabelNode(text: "Quit")
+        quitButton.fontSize = 30
+        quitButton.fontColor = .red
+        quitButton.fontName = "HelveticaNeue-Bold"
+        quitButton.position = CGPoint(x: 0, y: -panelSize.height / 2 + 50)
+        quitButton.name = "quitButton"
+        
+        modalPanel.addChild(quitButton)
     }
 
     func addSliderTitle(_ text: String, valueLabel: inout SKLabelNode!, y: CGFloat) {
