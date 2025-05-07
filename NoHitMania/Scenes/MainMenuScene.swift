@@ -74,7 +74,7 @@ class MainMenuScene: SKScene {
         }
     }
     private func openOptionsModal(){
-        let modal = OptionsScene(size: self.size)
+        let modal = OptionsScene(size: self.size, isMainMenu: true)
         modal.zPosition = 10
         modal.name = "optionsModal"
         addChild(modal)
