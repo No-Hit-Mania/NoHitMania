@@ -78,7 +78,6 @@ class ZapCellManager {
             }
         }
 
-        // ... rest of the function ...
         
         // Remove activated cells (in reverse order to avoid index issues)
         for index in cellsToRemove.sorted(by: >) {

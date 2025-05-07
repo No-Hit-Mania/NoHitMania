@@ -49,7 +49,7 @@ Subject to change.
 
 ### 2. Screen Archetypes
 
-- [ ] [**Main Menu Screen, Game Play Screen, Shop Screen, Wardrobe Screen**]
+- [X] [**Main Menu Screen, Game Play Screen, Shop Screen, Wardrobe Screen**]
 * [Required Feature: The player can choose to play the game, go to shop, check their settings, and go to their stickman wardrobe.]
 - [X] [**Game Play Screen**]
 * [Required Feature: Have implemented the game play]
@@ -57,35 +57,34 @@ Subject to change.
 * [Required Feature: The user can change settings in the app such as music and effect volume.]
 - [ ] [**Shop Screen**]
 * [Optional Feature: ]
-- [ ] [**Wardrobe Screen**] 
+- [X] [**Wardrobe Screen**] 
 * [Optinal Feature: ]
 
 ### 3. Navigation 
 
 **Button Navigations** (On the main menu)
 
-- [ ] [Play Button: Takes the user to the game play.]
-- [ ] [Shop Button: Takes the user to the shop menu to spin for stickman accessories]
-- [ ] [Settings Button: Takes user to settings menu.]
-- [ ] [StickmanL Press on Stickman to go to wardrobe.]
+- [X] [Play Button: Takes the user to the game play.]
+- [X] [Shop Button: Takes the user to the shop menu to spin for stickman accessories]
+- [X] [Settings Button: Takes user to settings menu.]
+- [X] [StickmanL Press on Stickman to go to wardrobe.]
 
 **Flow Navigation** (Screen to Screen)
 
-- [ ] [**Menu**]
+- [X] [**Menu**]
   * Leads to [**Game Window**]
   * Leads to [**Shop**]
   * Leads to [**Wardrobe**]
   * Leads to [**Settings**]
-  * Leads to [**GitHub page**]
-- [ ] [**Game Window**]
+- [X] [**Game Window**]
   * Leads to [**Settings**]
-- [ ] [**Shop**]
+- [X] [**Shop**]
   * Leads to [**Menu**]
   * Leads to [**Wardrobe**]
-- [ ] [**Wardrobe**]
+- [X] [**Wardrobe**]
   * Leads to [**Menu**]
   * Leads to [**Shop**]
-- [ ] [**Settings**]
+- [X] [**Settings**]
   * If in game
     * Leads to [**Game Window**]
   * Leads to [**Menu**]
