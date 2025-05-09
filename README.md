@@ -94,8 +94,10 @@ Subject to change.
 
 ![image](https://github.com/user-attachments/assets/6faaeabe-3e5f-44da-9c01-daa2381efbdc)
 
-### [BONUS] Interactive Prototype
+### Final Project Demo
+[Final Demo](https://youtu.be/Pvwwxir_4Y8)
 
+### Prototype
 ![Gif](https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExeDYxZ3AwZG1vd241M2NwdXVvb2trOXg3eGp0dXBmMGlhOWJrM3VzbCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/djaegchkYeOTeXcxgp/giphy.gif)
 
 ### Models
